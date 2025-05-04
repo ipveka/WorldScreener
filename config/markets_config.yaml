@@ -1,0 +1,202 @@
+# WorldScreener Markets Configuration
+
+# Market indices for different regions
+market_indices:
+  spain: '^IBEX'                # IBEX 35 (Spain)
+  europe: '^STOXX'              # STOXX Europe 600
+  eurozone: '^STOXX50E'         # EURO STOXX 50
+  us: '^GSPC'                   # S&P 500 (US)
+  global: 'ACWI'                # MSCI All Country World Index
+
+# European country codes
+european_countries:
+  - 'ES'  # Spain
+  - 'DE'  # Germany
+  - 'FR'  # France
+  - 'IT'  # Italy
+  - 'GB'  # United Kingdom
+  - 'NL'  # Netherlands
+  - 'CH'  # Switzerland
+  - 'SE'  # Sweden
+  - 'BE'  # Belgium
+  - 'DK'  # Denmark
+  - 'NO'  # Norway
+  - 'FI'  # Finland
+  - 'AT'  # Austria
+  - 'PT'  # Portugal
+  - 'IE'  # Ireland
+  - 'GR'  # Greece
+  - 'PL'  # Poland
+  - 'CZ'  # Czech Republic
+  - 'HU'  # Hungary
+  - 'RO'  # Romania
+
+# Stock exchanges for different European countries
+european_exchanges:
+  ES:  # Spain
+    - '.MC'  # Madrid Stock Exchange
+    - '.MA'  # Madrid Stock Exchange (alternate)
+  DE:  # Germany
+    - '.DE'  # Deutsche Börse
+    - '.F'   # Frankfurt Stock Exchange
+  FR:  # France
+    - '.PA'  # Euronext Paris
+  IT:  # Italy
+    - '.MI'  # Milan Stock Exchange
+  GB:  # United Kingdom
+    - '.L'   # London Stock Exchange
+  NL:  # Netherlands
+    - '.AS'  # Amsterdam Stock Exchange
+  CH:  # Switzerland
+    - '.SW'  # SIX Swiss Exchange
+    - '.VX'  # SIX Swiss Exchange (alternate)
+  SE:  # Sweden
+    - '.ST'  # Stockholm Stock Exchange
+  BE:  # Belgium
+    - '.BR'  # Brussels Stock Exchange
+  DK:  # Denmark
+    - '.CO'  # Copenhagen Stock Exchange
+  NO:  # Norway
+    - '.OL'  # Oslo Stock Exchange
+  FI:  # Finland
+    - '.HE'  # Helsinki Stock Exchange
+  PT:  # Portugal
+    - '.LS'  # Lisbon Stock Exchange
+  IE:  # Ireland
+    - '.IR'  # Irish Stock Exchange
+  AT:  # Austria
+    - '.VI'  # Vienna Stock Exchange
+
+# Default indices for each region (fallback if API fails)
+indices:
+  # Spain (IBEX 35 constituents)
+  spain:
+    - 'SAN.MC'    # Banco Santander
+    - 'BBVA.MC'   # BBVA
+    - 'ITX.MC'    # Inditex
+    - 'IBE.MC'    # Iberdrola
+    - 'REP.MC'    # Repsol
+    - 'CABK.MC'   # CaixaBank
+    - 'FER.MC'    # Ferrovial
+    - 'AENA.MC'   # Aena
+    - 'ELE.MC'    # Endesa
+    - 'GRF.MC'    # Grifols
+    - 'ACX.MC'    # Acerinox
+    - 'IAG.MC'    # IAG
+    - 'MEL.MC'    # Meliá Hotels
+    - 'SAB.MC'    # Banco Sabadell
+    - 'MAP.MC'    # Mapfre
+    - 'ENG.MC'    # Enagás
+  
+  # Europe (major European stocks)
+  europe:
+    # Spain
+    - 'SAN.MC'    # Banco Santander
+    - 'BBVA.MC'   # BBVA
+    - 'ITX.MC'    # Inditex
+    - 'IBE.MC'    # Iberdrola
+    # Germany
+    - 'SAP.DE'    # SAP
+    - 'SIE.DE'    # Siemens
+    - 'ALV.DE'    # Allianz
+    - 'BAYN.DE'   # Bayer
+    # France
+    - 'LVMH.PA'   # LVMH
+    - 'BNP.PA'    # BNP Paribas
+    - 'AIR.PA'    # Airbus
+    - 'SAN.PA'    # Sanofi
+    # Italy
+    - 'ENI.MI'    # ENI
+    - 'ISP.MI'    # Intesa Sanpaolo
+    - 'ENEL.MI'   # Enel
+    # UK
+    - 'HSBA.L'    # HSBC
+    - 'BP.L'      # BP
+    - 'GSK.L'     # GlaxoSmithKline
+    - 'AZN.L'     # AstraZeneca
+    # Netherlands
+    - 'ASML.AS'   # ASML
+    - 'UNA.AS'    # Unilever
+    - 'INGA.AS'   # ING
+    # Switzerland
+    - 'NESN.SW'   # Nestlé
+    - 'ROG.SW'    # Roche
+    - 'NOVN.SW'   # Novartis
+  
+  # Eurozone (major Eurozone stocks)
+  eurozone:
+    # Spain
+    - 'SAN.MC'    # Banco Santander
+    - 'BBVA.MC'   # BBVA
+    - 'ITX.MC'    # Inditex
+    # Germany
+    - 'SAP.DE'    # SAP
+    - 'SIE.DE'    # Siemens
+    - 'ALV.DE'    # Allianz
+    # France
+    - 'LVMH.PA'   # LVMH
+    - 'BNP.PA'    # BNP Paribas
+    - 'AIR.PA'    # Airbus
+    # Italy
+    - 'ENI.MI'    # ENI
+    - 'ISP.MI'    # Intesa Sanpaolo
+    - 'ENEL.MI'   # Enel
+    # Netherlands
+    - 'ASML.AS'   # ASML
+    - 'UNA.AS'    # Unilever
+    - 'INGA.AS'   # ING
+  
+  # US (major US stocks)
+  us:
+    # Technology
+    - 'AAPL'      # Apple
+    - 'MSFT'      # Microsoft
+    - 'GOOGL'     # Alphabet (Google)
+    - 'AMZN'      # Amazon
+    - 'META'      # Meta Platforms (Facebook)
+    - 'NVDA'      # NVIDIA
+    # Financial
+    - 'JPM'       # JPMorgan Chase
+    - 'BAC'       # Bank of America
+    - 'WFC'       # Wells Fargo
+    - 'C'         # Citigroup
+    - 'GS'        # Goldman Sachs
+    # Healthcare
+    - 'JNJ'       # Johnson & Johnson
+    - 'PFE'       # Pfizer
+    - 'MRK'       # Merck
+    - 'ABBV'      # AbbVie
+    - 'UNH'       # UnitedHealth Group
+    # Consumer
+    - 'PG'        # Procter & Gamble
+    - 'KO'        # Coca-Cola
+    - 'PEP'       # PepsiCo
+    - 'WMT'       # Walmart
+    - 'DIS'       # Walt Disney
+    # Industrial
+    - 'GE'        # General Electric
+    - 'BA'        # Boeing
+    - 'HON'       # Honeywell
+    - 'CAT'       # Caterpillar
+    # Energy
+    - 'XOM'       # Exxon Mobil
+    - 'CVX'       # Chevron
+    
+  # Global (mix of major global stocks)
+  global:
+    # US
+    - 'AAPL'      # Apple
+    - 'MSFT'      # Microsoft
+    - 'AMZN'      # Amazon
+    # Europe
+    - 'NESN.SW'   # Nestlé
+    - 'LVMH.PA'   # LVMH
+    - 'SAN.MC'    # Banco Santander
+    # Asia
+    - '1398.HK'   # ICBC
+    - '7203.T'    # Toyota
+    - '005930.KS' # Samsung
+    # Other
+    - 'BHP.AX'    # BHP Group
+    - 'VALE3.SA'  # Vale
+    - 'AAPL.MX'   # Apple (Mexico)

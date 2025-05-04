@@ -1,0 +1,102 @@
+# Default configuration for WorldScreener
+
+# Screening criteria
+screening:
+  # Default criteria
+  default_criteria:
+    max_pe_ratio: 15.0
+    min_dividend_yield: 3.0
+    max_pb_ratio: 1.5
+    min_roe: 10.0
+    max_debt_to_equity: 1.0
+    min_market_cap: 50000000
+  
+  # Value criteria
+  value_criteria:
+    max_pe_ratio: 15.0
+    min_dividend_yield: 3.0
+    max_pb_ratio: 1.5
+    min_roe: 10.0
+    max_debt_to_equity: 1.0
+    min_market_cap: 50000000 
+  
+  # Value score weights
+  value_score_weights:
+    pe_ratio: 0.25
+    dividend_yield: 0.25
+    pb_ratio: 0.20
+    roe: 0.15
+    debt_to_equity: 0.15
+
+# Market indices
+markets:
+  spain:
+    index: "^IBEX"
+    country: "Spain"
+    stocks:
+      - "SAN.MC"  # Banco Santander
+      - "BBVA.MC"  # BBVA
+      - "TEF.MC"  # Telefonica
+      - "IBE.MC"  # Iberdrola
+      - "REP.MC"  # Repsol
+      - "ITX.MC"  # Inditex
+      - "AMS.MC"  # Amadeus
+      - "FER.MC"  # Ferrovial
+      - "ELE.MC"  # Endesa
+      - "CABK.MC"  # CaixaBank
+  europe:
+    index: "^STOXX50E"
+    country: "Europe"
+    stocks:
+      - "ASML.AS"  # ASML Holding
+      - "SAP.DE"  # SAP
+      - "SIE.DE"  # Siemens
+      - "LVMH.PA"  # LVMH
+      - "ROG.SW"  # Roche
+      - "NOVN.SW"  # Novartis
+      - "NESN.SW"  # Nestle
+      - "AZN.L"  # AstraZeneca
+      - "ULVR.L"  # Unilever
+      - "RIO.L"  # Rio Tinto
+  eurozone:
+    index: "^STOXX"
+    country: "Eurozone"
+    stocks:
+      - "ASML.AS"  # ASML Holding
+      - "SAP.DE"  # SAP
+      - "SIE.DE"  # Siemens
+      - "LVMH.PA"  # LVMH
+      - "MC.PA"  # LVMH
+      - "BNP.PA"  # BNP Paribas
+      - "SAN.MC"  # Banco Santander
+      - "BBVA.MC"  # BBVA
+      - "ISP.MI"  # Intesa Sanpaolo
+      - "EBS.VI"  # Erste Group Bank
+  us:
+    index: "^SPX"
+    country: "United States"
+    stocks:
+      - "AAPL"  # Apple
+      - "MSFT"  # Microsoft
+      - "GOOGL"  # Alphabet (Google)
+      - "AMZN"  # Amazon
+      - "BRK-B"  # Berkshire Hathaway
+      - "JNJ"  # Johnson & Johnson
+      - "JPM"  # JPMorgan Chase
+      - "PG"  # Procter & Gamble
+      - "XOM"  # Exxon Mobil
+      - "KO"  # Coca-Cola
+
+# Data provider settings
+data_provider:
+  cache_expiry_hours: 24
+  api_rate_limit: 2000
+  
+# Visualization settings
+visualization:
+  default_figsize: [12, 8]
+  color_palette: "Set1"
+  
+# Report settings
+reporting:
+  default_format: "html"
