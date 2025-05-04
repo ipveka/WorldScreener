@@ -163,6 +163,33 @@ regions_data = {
 report_generator.generate_comparative_report(regions_data, output_file='comparative_report.html')
 ```
 
+## Project Structure
+
+```
+WorldScreener/
+├── src/                          # Source code
+│   ├── __init__.py              # Package initialization
+│   ├── data_provider.py         # Stock data retrieval
+│   ├── screener.py              # Stock screening logic
+│   ├── analyzer.py              # Stock analysis tools
+│   ├── visualizer.py            # Data visualization
+│   ├── report_generator.py      # Report generation
+│   └── utils.py                 # Utility functions
+│
+├── config/                       # Configuration files
+│   ├── default_config.yaml       # Default screening criteria
+│   ├── markets_config.yaml       # Market indices and country information
+│   └── tickers.yaml              # Ticker symbols for various markets
+│
+├── templates/                    # HTML templates directory
+│
+├── run.py                        # Command-line interface
+├── example.py                    # Example usage
+├── setup.py                      # Package setup script
+├── requirements.txt              # Dependencies
+└── README.md                     # This file
+```
+
 ## API Rate Limits and Mock Data
 
 WorldScreener uses Yahoo Finance (yfinance 0.2.58+) for retrieving stock data. Yahoo Finance has API rate limits that may cause HTTP 429 errors ("Too Many Requests") during heavy usage.
@@ -179,10 +206,10 @@ By default, the demo script uses mock data to avoid API rate limits:
 
 ```bash
 # Run with mock data (default)
-python notebooks/demo.py
+python example.py
 
 # Run with real data (may hit API rate limits)
-python notebooks/demo.py --use-real-data
+python example.py --use-real-data
 ```
 
 When using the library programmatically, you can control this behavior:
@@ -201,13 +228,13 @@ The mock data generator creates realistic stock data that passes screening crite
 
 ## Demo Script
 
-For a comprehensive demonstration of WorldScreener's capabilities, run the demo script:
+For a comprehensive demonstration of WorldScreener's capabilities, run the example script:
 
 ```bash
-python demo.py
+python example.py
 ```
 
-The demo script showcases:
+The example script showcases:
 1. Finding value stocks in Spain
 2. Custom screening across regions
 3. Value portfolio creation and analysis
@@ -235,41 +262,6 @@ All demo outputs are saved to the `output` directory.
 - **Sector Filtering**: Easily include or exclude specific sectors from your screening results
 - **Comparative Analysis**: Generate detailed reports comparing stocks across different regions
 - **Standardized Market Cap Display**: All market cap values are displayed in US dollars for consistent comparison across regions
-
-## Project Structure
-
-```
-worldscreener/
-│
-├── src/                          # Source code
-│   ├── __init__.py               # Package initialization
-│   ├── data_provider.py          # API connectors and data retrieval
-│   ├── screener.py               # Core screening logic
-│   ├── analyzer.py               # Stock analysis functions
-│   ├── visualizer.py             # Plotting and visualization
-│   ├── report_generator.py       # Report generation (HTML, CSV, etc.)
-│   └── utils.py                  # Utility functions
-│
-├── notebooks/                    # Jupyter notebooks
-│   └── demo.ipynb                # Demo notebook
-│
-├── config/                       # Configuration files
-│   ├── default_config.yaml       # Default screening criteria
-│   ├── markets_config.yaml       # Market indices and country information
-│   └── tickers.yaml              # Ticker symbols for various markets
-│
-├── templates/                    # HTML templates
-│   ├── report_template.html      # Basic report template
-│   ├── portfolio_template.html   # Portfolio summary template
-│   ├── analysis_template.html    # Stock analysis template
-│   ├── comparative_template.html # Comparative analysis template
-│   └── sector_template.html      # Sector analysis template
-│
-├── run.py                        # Command-line interface
-├── demo.py                       # Demonstration script
-├── setup.py                      # Package installation script
-└── README.md                     # Project documentation
-```
 
 ## Customization
 
