@@ -5,19 +5,19 @@ screening:
   # Default criteria
   default_criteria:
     max_pe_ratio: 15.0
-    min_dividend_yield: 3.0
+    min_dividend_yield: 1.0
     max_pb_ratio: 1.5
     min_roe: 10.0
-    max_debt_to_equity: 1.0
+    max_debt_to_equity: 1.5
     min_market_cap: 50000000
   
   # Value criteria
   value_criteria:
     max_pe_ratio: 15.0
-    min_dividend_yield: 3.0
+    min_dividend_yield: 1.0
     max_pb_ratio: 1.5
     min_roe: 10.0
-    max_debt_to_equity: 1.0
+    max_debt_to_equity: 1.5
     min_market_cap: 50000000 
   
   # Value score weights

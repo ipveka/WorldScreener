@@ -14,6 +14,7 @@ from tabulate import tabulate
 import pandas as pd
 import matplotlib.pyplot as plt
 import jinja2
+from src.utils import format_currency, format_percentage
 
 logger = logging.getLogger(__name__)
 
@@ -56,33 +57,31 @@ class ReportGenerator:
         if stocks_df.empty:
             return "No stocks found matching criteria."
         
-        # Format the data for reporting
-        report_df = stocks_df.copy()
+        # Add price field for compatibility with templates
+        if 'current_price' in stocks_df.columns and 'price' not in stocks_df.columns:
+            stocks_df = stocks_df.copy()
+            stocks_df['price'] = stocks_df['current_price']
         
-        # Round numeric columns
-        numeric_columns = ['pe_ratio', 'pb_ratio', 'dividend_yield', 'roe', 
-                          'debt_to_equity', 'value_score']
-        for col in numeric_columns:
-            if col in report_df.columns:
-                report_df[col] = report_df[col].round(2)
-        
-        # Select columns for report
-        display_columns = ['ticker', 'name', 'sector', 'country', 'price', 
-                         'pe_ratio', 'pb_ratio', 'dividend_yield', 'roe', 
-                         'debt_to_equity', 'value_score']
-        
-        # Ensure all display columns are in the DataFrame
-        display_columns = [col for col in display_columns if col in report_df.columns]
-        
-        report_df = report_df[display_columns]
-        
-        # Generate report in the specified format
-        method_name = f"_generate_{output_format}_report"
-        if hasattr(self, method_name):
-            return getattr(self, method_name)(report_df, output_file)
+        # Generate report based on format
+        if output_format == 'text':
+            report = self._generate_text_report(stocks_df)
+        elif output_format == 'csv':
+            report = self._generate_csv_report(stocks_df)
+        elif output_format == 'json':
+            report = self._generate_json_report(stocks_df)
+        elif output_format == 'html':
+            report = self._generate_html_report(stocks_df)
         else:
-            logger.error(f"Unsupported output format: {output_format}")
-            return self._generate_text_report(report_df, output_file)
+            report = f"Unsupported format: {output_format}"
+        
+        # Save to file if specified
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(report)
+            logger.info(f"Report saved to {output_file}")
+            return f"Report saved to {output_file}"
+        
+        return report
     
     def _generate_text_report(self, df, output_file=None):
         """
@@ -169,7 +168,7 @@ class ReportGenerator:
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 20px; }}
                     h1 {{ color: #2c3e50; }}
-                    table {{ border-collapse: collapse; width: 100%; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 30px; }}
                     th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
                     th {{ background-color: #2c3e50; color: white; }}
                     tr:nth-child(even) {{ background-color: #f2f2f2; }}
@@ -359,183 +358,96 @@ class ReportGenerator:
         
         return html
     
-    def generate_comparative_report(self, stocks_dict, region_names=None, output_file=None):
+    def generate_comparative_report(self, stocks_dict, output_file=None):
         """
-        Generate a comparative report for stocks from multiple regions.
+        Generate a comparative report for stocks from different regions.
         
         Args:
-            stocks_dict (dict): Dictionary of region: DataFrame pairs
-            region_names (dict, optional): Dictionary of region: display_name pairs
+            stocks_dict (dict): Dictionary with region names as keys and DataFrames as values
             output_file (str, optional): Output file path
             
         Returns:
-            str: Report content or file path if saved
+            str: Report content
         """
-        if not stocks_dict:
-            return "No data available for comparison."
-            
+        # Check if we have any stocks
+        if not stocks_dict or all(df.empty for df in stocks_dict.values()):
+            logger.warning("No stocks available for comparative report")
+            return "No stocks available for comparative report"
+        
         try:
-            # Try to use Jinja template
-            template = self.jinja_env.get_template('comparative_template.html')
+            # Try to load template
+            template = self.jinja_env.get_template('comparative_report.html')
             
-            # Process region data
-            regions_data = []
-            for region, df in stocks_dict.items():
-                if df.empty:
-                    continue
-                    
-                display_name = region_names.get(region, region.capitalize()) if region_names else region.capitalize()
-                
-                regions_data.append({
-                    'name': display_name,
-                    'stocks': df.to_dict('records'),
-                    'count': len(df),
-                    'avg_pe': df['pe_ratio'].mean(),
-                    'avg_div': df['dividend_yield'].mean(),
-                    'avg_score': df['value_score'].mean(),
-                    'top_stock': df.loc[df['value_score'].idxmax()]['ticker'] if not df.empty else 'None'
-                })
-                
-            html_report = template.render(
-                title="WorldScreener Comparative Report",
-                generated_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                regions=regions_data
-            )
+            # Prepare data for template
+            template_data = {
+                'title': 'Value Stocks Comparative Report',
+                'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'regions': list(stocks_dict.keys()),
+                'stocks_dict': stocks_dict,
+                'has_stocks': any(not df.empty for df in stocks_dict.values())
+            }
+            
+            # Render template
+            report_content = template.render(**template_data)
+            
         except Exception as e:
             logger.warning(f"Error using Jinja template: {e}. Falling back to basic HTML.")
-            # Fallback to basic HTML
-            html_report = self._generate_basic_comparative_html(stocks_dict, region_names)
+            
+            # Create a basic HTML report
+            report_content = """
+            <html>
+            <head>
+                <title>Comparative Value Stocks Report</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                    h1, h2, h3 { color: #2c3e50; }
+                    .container { max-width: 1200px; margin: 0 auto; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #2c3e50; color: white; }
+                    tr:nth-child(even) { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Comparative Value Stocks Report</h1>
+                    <p>Generated on: """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
+            """
+            
+            # Add stocks by region
+            for region, stocks_df in stocks_dict.items():
+                if not stocks_df.empty:
+                    # Add price field for compatibility
+                    if 'current_price' in stocks_df.columns and 'price' not in stocks_df.columns:
+                        stocks_df = stocks_df.copy()
+                        stocks_df['price'] = stocks_df['current_price']
+                        
+                    # Display only essential columns
+                    display_df = stocks_df[['ticker', 'name', 'sector', 'country', 'pe_ratio', 
+                                           'dividend_yield', 'pb_ratio', 'roe', 'debt_to_equity', 
+                                           'market_cap', 'value_score']].copy()
+                    # Convert market cap to billions for display
+                    display_df.loc[:, 'market_cap'] = display_df['market_cap'] / 1_000_000_000
+                    
+                    report_content += f"""
+                    <h2>{region.title()} Stocks</h2>
+                    {display_df.to_html(classes='table table-striped')}
+                    <p>Market cap is displayed in billions of US dollars.</p>
+                    """
+            
+            report_content += """
+                </div>
+            </body>
+            </html>
+            """
         
+        # Save to file if specified
         if output_file:
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(html_report)
-            return f"Comparative report saved to {output_file}"
-        return html_report
-    
-    def _generate_basic_comparative_html(self, stocks_dict, region_names=None):
-        """
-        Generate basic comparative HTML without Jinja.
+                f.write(report_content)
+            logger.info(f"Comparative report saved to {output_file}")
         
-        Args:
-            stocks_dict (dict): Dictionary of region: DataFrame pairs
-            region_names (dict, optional): Dictionary of region: display_name pairs
-            
-        Returns:
-            str: HTML report content
-        """
-        # Basic HTML template for comparative report
-        html = f"""
-        <html>
-        <head>
-            <title>WorldScreener Comparative Report</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }}
-                h1, h2, h3 {{ color: #2c3e50; }}
-                .container {{ max-width: 1200px; margin: 0 auto; }}
-                .region {{ margin-bottom: 40px; }}
-                .summary {{ background-color: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 5px solid #2c3e50; }}
-                .region-table {{ border-collapse: collapse; width: 100%; margin-bottom: 30px; }}
-                .region-table th, .region-table td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                .region-table th {{ background-color: #2c3e50; color: white; }}
-                .region-table tr:nth-child(even) {{ background-color: #f2f2f2; }}
-                .comparison {{ display: flex; flex-wrap: wrap; margin-top: 30px; }}
-                .comparison-chart {{ width: 48%; margin-right: 2%; margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }}
-                .value-good {{ color: green; }}
-                .value-fair {{ color: orange; }}
-                .value-poor {{ color: red; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>WorldScreener Comparative Report</h1>
-                <p>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-                
-                <div class="summary">
-                    <h2>Regional Comparison Summary</h2>
-                    <table class="region-table">
-                        <tr>
-                            <th>Region</th>
-                            <th>Stock Count</th>
-                            <th>Avg P/E Ratio</th>
-                            <th>Avg Dividend Yield</th>
-                            <th>Avg Value Score</th>
-                            <th>Top Stock</th>
-                        </tr>
-        """
-        
-        # Add each region to the summary table
-        for region, df in stocks_dict.items():
-            if df.empty:
-                continue
-                
-            display_name = region_names.get(region, region.capitalize()) if region_names else region.capitalize()
-            
-            html += f"""
-                        <tr>
-                            <td>{display_name}</td>
-                            <td>{len(df)}</td>
-                            <td>{df['pe_ratio'].mean():.2f}</td>
-                            <td>{df['dividend_yield'].mean():.2f}%</td>
-                            <td>{df['value_score'].mean():.2f}</td>
-                            <td>{df.loc[df['value_score'].idxmax()]['ticker'] if not df.empty else 'None'}</td>
-                        </tr>
-            """
-        
-        html += """
-                    </table>
-                </div>
-        """
-        
-        # Add detailed section for each region
-        for region, df in stocks_dict.items():
-            if df.empty:
-                continue
-                
-            display_name = region_names.get(region, region.capitalize()) if region_names else region.capitalize()
-            
-            html += f"""
-                <div class="region">
-                    <h2>{display_name} Value Stocks</h2>
-                    <table class="region-table">
-                        <tr>
-                            <th>Ticker</th>
-                            <th>Name</th>
-                            <th>Sector</th>
-                            <th>Country</th>
-                            <th>P/E Ratio</th>
-                            <th>Dividend Yield</th>
-                            <th>Value Score</th>
-                        </tr>
-            """
-            
-            # Add each stock to the region table
-            for _, stock in df.iterrows():
-                value_class = "value-good" if stock['value_score'] >= 70 else "value-fair" if stock['value_score'] >= 50 else "value-poor"
-                
-                html += f"""
-                        <tr>
-                            <td>{stock['ticker']}</td>
-                            <td>{stock['name']}</td>
-                            <td>{stock['sector'] if 'sector' in stock else 'N/A'}</td>
-                            <td>{stock['country'] if 'country' in stock else 'N/A'}</td>
-                            <td>{stock['pe_ratio']:.2f if 'pe_ratio' in stock and stock['pe_ratio'] != 'N/A' else 'N/A'}</td>
-                            <td>{stock['dividend_yield']:.2f}% if 'dividend_yield' in stock and stock['dividend_yield'] != 'N/A' else 'N/A'</td>
-                            <td class="{value_class}">{stock['value_score']:.2f if 'value_score' in stock and stock['value_score'] != 'N/A' else 'N/A'}</td>
-                        </tr>
-                """
-            
-            html += """
-                    </table>
-                </div>
-            """
-        
-        html += """
-            </div>
-        </body>
-        </html>
-        """
-        
-        return html
+        return report_content
     
     def generate_sector_report(self, stocks_df, sector_name, output_file=None):
         """
@@ -550,7 +462,7 @@ class ReportGenerator:
             str: Report content or file path if saved
         """
         if stocks_df.empty:
-            return f"No stocks found in {sector_name} sector."
+            return f"No stocks found matching criteria."
         
         # Filter stocks by sector
         sector_stocks = stocks_df[stocks_df['sector'] == sector_name]
@@ -612,6 +524,7 @@ class ReportGenerator:
                             <th>Ticker</th>
                             <th>Name</th>
                             <th>Country</th>
+                            <th>Price</th>
                             <th>P/E Ratio</th>
                             <th>Dividend Yield</th>
                             <th>ROE</th>
@@ -629,6 +542,7 @@ class ReportGenerator:
                             <td>{stock['ticker']}</td>
                             <td>{stock['name']}</td>
                             <td>{stock['country'] if 'country' in stock else 'N/A'}</td>
+                            <td>{stock['price']:.2f if 'price' in stock and stock['price'] != 'N/A' else 'N/A'}</td>
                             <td>{stock['pe_ratio']:.2f if 'pe_ratio' in stock and stock['pe_ratio'] != 'N/A' else 'N/A'}</td>
                             <td>{stock['dividend_yield']:.2f}% if 'dividend_yield' in stock and stock['dividend_yield'] != 'N/A' else 'N/A'</td>
                             <td>{stock['roe']:.2f}% if 'roe' in stock and stock['roe'] != 'N/A' else 'N/A'</td>
@@ -649,6 +563,149 @@ class ReportGenerator:
                 f.write(html_report)
             return f"Sector report saved to {output_file}"
         return html_report
+    
+    def generate_stock_report(self, stock_analysis, output_file=None):
+        """
+        Generate a detailed report for a single stock.
+        
+        Args:
+            stock_analysis (dict): Dictionary with detailed stock analysis
+            output_file (str, optional): Output file path
+            
+        Returns:
+            str: Report content
+        """
+        # Check if we have any analysis data
+        if not stock_analysis:
+            return "No analysis data available for stock report"
+        
+        # Extract basic stock info
+        ticker = stock_analysis.get('ticker', 'Unknown')
+        name = stock_analysis.get('name', ticker)
+        
+        # Create a basic HTML report
+        html = f"""
+        <html>
+        <head>
+            <title>{name} ({ticker}) - Detailed Stock Analysis</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }}
+                h1, h2, h3 {{ color: #2c3e50; }}
+                .container {{ max-width: 1200px; margin: 0 auto; }}
+                .summary {{ background-color: #f8f9fa; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
+                .metrics {{ display: flex; flex-wrap: wrap; }}
+                .metric-group {{ width: 48%; margin-right: 2%; margin-bottom: 20px; }}
+                table {{ border-collapse: collapse; width: 100%; margin-bottom: 30px; }}
+                th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
+                th {{ background-color: #2c3e50; color: white; }}
+                tr:nth-child(even) {{ background-color: #f2f2f2; }}
+                .good {{ color: green; }}
+                .fair {{ color: orange; }}
+                .poor {{ color: red; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>{name} ({ticker}) - Detailed Analysis</h1>
+                <p>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                
+                <div class="summary">
+                    <h2>Stock Summary</h2>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Ticker:</strong> {ticker}</p>
+                    <p><strong>Sector:</strong> {stock_analysis.get('sector', stock_analysis.get('Sector', 'N/A'))}</p>
+                    <p><strong>Industry:</strong> {stock_analysis.get('industry', stock_analysis.get('Industry', 'N/A'))}</p>
+                    <p><strong>Country:</strong> {stock_analysis.get('country', stock_analysis.get('Country', 'N/A'))}</p>
+                    <p><strong>Current Price:</strong> {stock_analysis.get('current_price', stock_analysis.get('Current Price', 'N/A'))}</p>
+                    <p><strong>Market Cap:</strong> {format_currency(stock_analysis.get('market_cap', stock_analysis.get('Market Cap', 0)) / 1_000_000_000)} B</p>
+                </div>
+                
+                <h2>Valuation Metrics</h2>
+                <table>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Assessment</th>
+                    </tr>
+                    <tr>
+                        <td>P/E Ratio</td>
+                        <td>{stock_analysis.get('pe_ratio', stock_analysis.get('P/E Ratio', 'N/A'))}</td>
+                        <td class="{self._get_assessment_class(stock_analysis.get('pe_ratio_assessment', 'N/A'))}">
+                            {stock_analysis.get('pe_ratio_assessment', 'N/A')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>P/B Ratio</td>
+                        <td>{stock_analysis.get('pb_ratio', stock_analysis.get('P/B Ratio', 'N/A'))}</td>
+                        <td class="{self._get_assessment_class(stock_analysis.get('pb_ratio_assessment', 'N/A'))}">
+                            {stock_analysis.get('pb_ratio_assessment', 'N/A')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Dividend Yield</td>
+                        <td>{stock_analysis.get('dividend_yield', stock_analysis.get('Dividend Yield (%)', 'N/A'))}%</td>
+                        <td class="{self._get_assessment_class(stock_analysis.get('dividend_yield_assessment', 'N/A'))}">
+                            {stock_analysis.get('dividend_yield_assessment', 'N/A')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ROE</td>
+                        <td>{stock_analysis.get('roe', stock_analysis.get('ROE (%)', 'N/A'))}%</td>
+                        <td class="{self._get_assessment_class(stock_analysis.get('roe_assessment', 'N/A'))}">
+                            {stock_analysis.get('roe_assessment', 'N/A')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Debt to Equity</td>
+                        <td>{stock_analysis.get('debt_to_equity', stock_analysis.get('Debt to Equity', 'N/A'))}</td>
+                        <td class="{self._get_assessment_class(stock_analysis.get('debt_to_equity_assessment', 'N/A'))}">
+                            {stock_analysis.get('debt_to_equity_assessment', 'N/A')}
+                        </td>
+                    </tr>
+                </table>
+                
+                <h2>Overall Value Assessment</h2>
+                <div class="summary">
+                    <p><strong>Value Score:</strong> {stock_analysis.get('value_score', 'N/A')}</p>
+                    <p><strong>Assessment:</strong> <span class="{self._get_assessment_class(stock_analysis.get('overall_assessment', 'N/A'))}">
+                        {stock_analysis.get('overall_assessment', 'N/A')}
+                    </span></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Save to file if specified
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+            logger.info(f"Stock report for {name} saved to {output_file}")
+        
+        return html
+    
+    def _get_assessment_class(self, assessment):
+        """
+        Get CSS class based on assessment value.
+        
+        Args:
+            assessment (str): Assessment value
+            
+        Returns:
+            str: CSS class
+        """
+        if not assessment or assessment == 'N/A':
+            return ''
+            
+        assessment = assessment.lower()
+        if 'excellent' in assessment or 'good' in assessment or 'strong' in assessment:
+            return 'good'
+        elif 'fair' in assessment or 'average' in assessment or 'moderate' in assessment:
+            return 'fair'
+        elif 'poor' in assessment or 'weak' in assessment or 'high risk' in assessment:
+            return 'poor'
+        else:
+            return ''
     
     def generate_stock_analysis_report(self, analysis, output_file=None):
         """

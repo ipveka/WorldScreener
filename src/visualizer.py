@@ -111,64 +111,156 @@ class Visualizer:
         
         return plt.gcf()
     
-    def create_sector_breakdown_chart(self, stocks_df, output_file=None, title=None):
+    def create_sector_breakdown_chart(self, stocks_df, output_file=None, title=None, figsize=(12, 8)):
         """
-        Create a pie chart showing the sector breakdown of stocks.
+        Create a sector breakdown chart for a set of stocks.
         
         Args:
             stocks_df (pandas.DataFrame): DataFrame with stock data
-            output_file (str, optional): Output file path
+            output_file (str, optional): Path to save the chart
             title (str, optional): Chart title
+            figsize (tuple, optional): Figure size
             
         Returns:
             matplotlib.figure.Figure: The created figure
         """
-        if stocks_df.empty:
-            logger.warning("No data to visualize")
+        try:
+            if stocks_df.empty:
+                logger.warning("No stocks data provided for sector breakdown chart")
+                return None
+                
+            # Count stocks by sector
+            sector_counts = stocks_df['sector'].value_counts()
+            
+            # Create figure
+            fig, ax = plt.subplots(figsize=figsize)
+            
+            # Create pie chart
+            wedges, texts, autotexts = ax.pie(
+                sector_counts, 
+                labels=sector_counts.index, 
+                autopct='%1.1f%%',
+                startangle=90,
+                shadow=False,
+                wedgeprops={'edgecolor': 'w', 'linewidth': 1}
+            )
+            
+            # Style the chart
+            for text in texts:
+                text.set_fontsize(10)
+            for autotext in autotexts:
+                autotext.set_fontsize(9)
+                autotext.set_color('white')
+                
+            # Add title
+            chart_title = title or "Sector Breakdown"
+            ax.set_title(chart_title, fontsize=14, pad=20)
+            
+            # Add legend
+            ax.legend(
+                wedges, 
+                [f"{sector} ({count})" for sector, count in zip(sector_counts.index, sector_counts)],
+                title="Sectors",
+                loc="center left",
+                bbox_to_anchor=(1, 0, 0.5, 1)
+            )
+            
+            plt.tight_layout()
+            
+            # Save to file if specified
+            if output_file:
+                plt.savefig(output_file, dpi=300, bbox_inches='tight')
+                logger.info(f"Sector breakdown chart saved to {output_file}")
+                
+            return fig
+            
+        except Exception as e:
+            logger.error(f"Error creating sector breakdown chart: {e}")
             return None
+            
+    def create_region_breakdown_chart(self, stocks_df, output_file=None, title=None, figsize=(12, 8)):
+        """
+        Create a region breakdown chart for a set of stocks.
         
-        # Count stocks by sector
-        sector_counts = stocks_df['sector'].value_counts()
-        
-        # Create figure with white background
-        fig, ax = plt.subplots(figsize=(10, 8), facecolor='white')
-        ax.set_facecolor('white')
-        
-        # Create pie chart
-        wedges, texts, autotexts = ax.pie(
-            sector_counts, 
-            labels=sector_counts.index,
-            autopct='%1.1f%%',
-            startangle=90,
-            shadow=False,
-            wedgeprops={'edgecolor': 'white', 'linewidth': 1}
-        )
-        
-        # Style the text
-        for text in texts:
-            text.set_fontsize(12)
-        for autotext in autotexts:
-            autotext.set_fontsize(10)
-            autotext.set_color('white')
-        
-        # Set title
-        if title:
-            ax.set_title(title, fontsize=16, pad=20)
-        else:
-            ax.set_title('Sector Breakdown', fontsize=16, pad=20)
-        
-        # Equal aspect ratio ensures that pie is drawn as a circle
-        ax.axis('equal')
-        
-        # Tight layout
-        plt.tight_layout()
-        
-        # Save to file if specified
-        if output_file:
-            plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white')
-            logger.info(f"Sector breakdown chart saved to {output_file}")
-        
-        return fig
+        Args:
+            stocks_df (pandas.DataFrame): DataFrame with stock data
+            output_file (str, optional): Path to save the chart
+            title (str, optional): Chart title
+            figsize (tuple, optional): Figure size
+            
+        Returns:
+            matplotlib.figure.Figure: The created figure
+        """
+        try:
+            if stocks_df.empty:
+                logger.warning("No stocks data provided for region breakdown chart")
+                return None
+                
+            # Count stocks by country
+            if 'country' in stocks_df.columns:
+                region_counts = stocks_df['country'].value_counts()
+            else:
+                # If country is not available, try to extract region from ticker
+                def get_region(ticker):
+                    if ticker.endswith('.T'):
+                        return 'Japan'
+                    elif any(ticker.endswith(suffix) for suffix in ['.L', '.DE', '.PA', '.MI', '.MC', '.AS', '.SW', '.CO', '.ST', '.HE', '.OL']):
+                        return 'Europe'
+                    elif '.' not in ticker:
+                        return 'US'
+                    else:
+                        return 'Other'
+                
+                stocks_df['region'] = stocks_df['ticker'].apply(get_region)
+                region_counts = stocks_df['region'].value_counts()
+            
+            # Create figure
+            fig, ax = plt.subplots(figsize=figsize)
+            
+            # Create pie chart
+            colors = plt.cm.tab10.colors
+            wedges, texts, autotexts = ax.pie(
+                region_counts, 
+                labels=region_counts.index, 
+                autopct='%1.1f%%',
+                startangle=90,
+                shadow=False,
+                colors=colors,
+                wedgeprops={'edgecolor': 'w', 'linewidth': 1}
+            )
+            
+            # Style the chart
+            for text in texts:
+                text.set_fontsize(10)
+            for autotext in autotexts:
+                autotext.set_fontsize(9)
+                autotext.set_color('white')
+                
+            # Add title
+            chart_title = title or "Regional Breakdown"
+            ax.set_title(chart_title, fontsize=14, pad=20)
+            
+            # Add legend
+            ax.legend(
+                wedges, 
+                [f"{region} ({count})" for region, count in zip(region_counts.index, region_counts)],
+                title="Regions",
+                loc="center left",
+                bbox_to_anchor=(1, 0, 0.5, 1)
+            )
+            
+            plt.tight_layout()
+            
+            # Save to file if specified
+            if output_file:
+                plt.savefig(output_file, dpi=300, bbox_inches='tight')
+                logger.info(f"Region breakdown chart saved to {output_file}")
+                
+            return fig
+            
+        except Exception as e:
+            logger.error(f"Error creating region breakdown chart: {e}")
+            return None
     
     def create_metrics_comparison_chart(self, stocks_df, output_file=None, title=None):
         """
