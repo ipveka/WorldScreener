@@ -1,0 +1,504 @@
+---
+# WorldScreener Tickers Configuration
+# Contains tickers for major indices: S&P 500, EUROSTOXX 600, and Nikkei 225
+
+# S&P 500 Tickers
+sp500:
+  - AAPL  # Apple Inc.
+  - MSFT  # Microsoft Corporation
+  - AMZN  # Amazon.com Inc.
+  - NVDA  # NVIDIA Corporation
+  - GOOGL # Alphabet Inc. (Class A)
+  - GOOG  # Alphabet Inc. (Class C)
+  - META  # Meta Platforms Inc.
+  - BRK.B # Berkshire Hathaway Inc. (Class B)
+  - TSLA  # Tesla Inc.
+  - UNH   # UnitedHealth Group Inc.
+  - LLY   # Eli Lilly and Company
+  - JPM   # JPMorgan Chase & Co.
+  - V     # Visa Inc.
+  - JNJ   # Johnson & Johnson
+  - PG    # Procter & Gamble Co.
+  - XOM   # Exxon Mobil Corporation
+  - MA    # Mastercard Inc.
+  - HD    # Home Depot Inc.
+  - AVGO  # Broadcom Inc.
+  - MRK   # Merck & Co. Inc.
+  - CVX   # Chevron Corporation
+  - ABBV  # AbbVie Inc.
+  - PEP   # PepsiCo Inc.
+  - COST  # Costco Wholesale Corporation
+  - ADBE  # Adobe Inc.
+  - KO    # Coca-Cola Company
+  - WMT   # Walmart Inc.
+  - MCD   # McDonald's Corporation
+  - CRM   # Salesforce Inc.
+  - TMO   # Thermo Fisher Scientific Inc.
+  - ACN   # Accenture plc
+  - BAC   # Bank of America Corporation
+  - ABT   # Abbott Laboratories
+  - CSCO  # Cisco Systems Inc.
+  - CMCSA # Comcast Corporation
+  - NFLX  # Netflix Inc.
+  - AMD   # Advanced Micro Devices Inc.
+  - DHR   # Danaher Corporation
+  - ORCL  # Oracle Corporation
+  - DIS   # Walt Disney Company
+  - TXN   # Texas Instruments Inc.
+  - LIN   # Linde plc
+  - PM    # Philip Morris International Inc.
+  - VZ    # Verizon Communications Inc.
+  - INTC  # Intel Corporation
+  - NEE   # NextEra Energy Inc.
+  - INTU  # Intuit Inc.
+  - UPS   # United Parcel Service Inc.
+  - CAT   # Caterpillar Inc.
+  - HON   # Honeywell International Inc.
+  - IBM   # International Business Machines Corporation
+  - RTX   # Raytheon Technologies Corporation
+  - AMGN  # Amgen Inc.
+  - LOW   # Lowe's Companies Inc.
+  - SPGI  # S&P Global Inc.
+  - DE    # Deere & Company
+  - GE    # General Electric Company
+  - AMAT  # Applied Materials Inc.
+  - QCOM  # QUALCOMM Incorporated
+  - PFE   # Pfizer Inc.
+  - BKNG  # Booking Holdings Inc.
+  - SBUX  # Starbucks Corporation
+  - AXP   # American Express Company
+  - ISRG  # Intuitive Surgical Inc.
+  - T     # AT&T Inc.
+  - MS    # Morgan Stanley
+  - NOW   # ServiceNow Inc.
+  - GS    # Goldman Sachs Group Inc.
+  - BLK   # BlackRock Inc.
+  - MDLZ  # Mondelez International Inc.
+  - GILD  # Gilead Sciences Inc.
+  - ADI   # Analog Devices Inc.
+  - TMUS  # T-Mobile US Inc.
+  - MMC   # Marsh & McLennan Companies Inc.
+  - TJX   # TJX Companies Inc.
+  - CVS   # CVS Health Corporation
+  - SCHW  # Charles Schwab Corporation
+  - C     # Citigroup Inc.
+  - PLD   # Prologis Inc.
+  - LRCX  # Lam Research Corporation
+  - ADP   # Automatic Data Processing Inc.
+  - ETN   # Eaton Corporation plc
+  - ZTS   # Zoetis Inc.
+  - REGN  # Regeneron Pharmaceuticals Inc.
+  - CB    # Chubb Limited
+  - VRTX  # Vertex Pharmaceuticals Inc.
+  - CI    # Cigna Group
+  - SO    # Southern Company
+  - BSX   # Boston Scientific Corporation
+  - PGR   # Progressive Corporation
+  - SYK   # Stryker Corporation
+  - MO    # Altria Group Inc.
+  - PANW  # Palo Alto Networks Inc.
+  - DUK   # Duke Energy Corporation
+  - SNPS  # Synopsys Inc.
+  - COP   # ConocoPhillips
+  - CDNS  # Cadence Design Systems Inc.
+  - BDX   # Becton, Dickinson and Company
+  - ICE   # Intercontinental Exchange Inc.
+  - KLAC  # KLA Corporation
+  - EQIX  # Equinix Inc.
+  - CME   # CME Group Inc.
+  - WFC   # Wells Fargo & Company
+  - MU    # Micron Technology Inc.
+  - ITW   # Illinois Tool Works Inc.
+  - PYPL  # PayPal Holdings Inc.
+  - CSX   # CSX Corporation
+  - MCO   # Moody's Corporation
+  - APD   # Air Products and Chemicals Inc.
+  - FISV  # Fiserv Inc.
+  - ELV   # Elevance Health Inc.
+  - HUM   # Humana Inc.
+  - ORLY  # O'Reilly Automotive Inc.
+  - AON   # Aon plc
+  - ADSK  # Autodesk Inc.
+  - FI    # Fidelity National Information Services Inc.
+  - CL    # Colgate-Palmolive Company
+  - AMT   # American Tower Corporation
+  - SLB   # Schlumberger Limited
+  - MPC   # Marathon Petroleum Corporation
+  - NXPI  # NXP Semiconductors N.V.
+  - TGT   # Target Corporation
+  - CHTR  # Charter Communications Inc.
+  - NOC   # Northrop Grumman Corporation
+  - GD    # General Dynamics Corporation
+  - ANET  # Arista Networks Inc.
+  - MSCI  # MSCI Inc.
+  - PCAR  # PACCAR Inc.
+  - MCHP  # Microchip Technology Inc.
+  - AJG   # Arthur J. Gallagher & Co.
+  - PNC   # PNC Financial Services Group Inc.
+  - NSC   # Norfolk Southern Corporation
+  - USB   # U.S. Bancorp
+  - BIIB  # Biogen Inc.
+  - TT    # Trane Technologies plc
+  - MNST  # Monster Beverage Corporation
+  - ROST  # Ross Stores Inc.
+  - IDXX  # IDEXX Laboratories Inc.
+  - DXCM  # DexCom Inc.
+  - CRWD  # CrowdStrike Holdings Inc.
+  - PSA   # Public Storage
+  - STZ   # Constellation Brands Inc.
+  - MSI   # Motorola Solutions Inc.
+  - MRNA  # Moderna Inc.
+  - CTSH  # Cognizant Technology Solutions Corporation
+  - AIG   # American International Group Inc.
+  - ROP   # Roper Technologies Inc.
+  - KMB   # Kimberly-Clark Corporation
+  - WELL  # Welltower Inc.
+  - ADM   # Archer-Daniels-Midland Company
+  - CTAS  # Cintas Corporation
+  - APH   # Amphenol Corporation
+  - SPG   # Simon Property Group Inc.
+  - CARR  # Carrier Global Corporation
+  - HCA   # HCA Healthcare Inc.
+  - TRV   # Travelers Companies Inc.
+  - FTNT  # Fortinet Inc.
+  - AZO   # AutoZone Inc.
+  - EA    # Electronic Arts Inc.
+  - D     # Dominion Energy Inc.
+  - ODFL  # Old Dominion Freight Line Inc.
+  - KDP   # Keurig Dr Pepper Inc.
+  - MAR   # Marriott International Inc.
+  - ECL   # Ecolab Inc.
+  - GIS   # General Mills Inc.
+  - O     # Realty Income Corporation
+  - WM    # Waste Management Inc.
+  - PAYX  # Paychex Inc.
+  - OTIS  # Otis Worldwide Corporation
+  - CPRT  # Copart Inc.
+  - ILMN  # Illumina Inc.
+  - CMG   # Chipotle Mexican Grill Inc.
+  - DLTR  # Dollar Tree Inc.
+  - MCK   # McKesson Corporation
+  - FAST  # Fastenal Company
+  - EXC   # Exelon Corporation
+  - STT   # State Street Corporation
+  - VRSK  # Verisk Analytics Inc.
+  - KVUE  # Kenvue Inc.
+  - PXD   # Pioneer Natural Resources Company
+  - AFL   # Aflac Incorporated
+  - ABNB  # Airbnb Inc.
+  - KHC   # Kraft Heinz Company
+  - DOW   # Dow Inc.
+  - PRU   # Prudential Financial Inc.
+  - CSGP  # CoStar Group Inc.
+  - ALL   # Allstate Corporation
+  - WDAY  # Workday Inc.
+  - KEYS  # Keysight Technologies Inc.
+  - SBAC  # SBA Communications Corporation
+  - NDAQ  # Nasdaq Inc.
+  - VICI  # VICI Properties Inc.
+  - UBER  # Uber Technologies Inc.
+  - WMB   # Williams Companies Inc.
+  - ANSS  # ANSYS Inc.
+  - ACGL  # Arch Capital Group Ltd.
+  - GEHC  # GE HealthCare Technologies Inc.
+  - FANG  # Diamondback Energy Inc.
+  - FICO  # Fair Isaac Corporation
+  - URI   # United Rentals Inc.
+  - MPWR  # Monolithic Power Systems Inc.
+  - DLR   # Digital Realty Trust Inc.
+  - TROW  # T. Rowe Price Group Inc.
+  - HBAN  # Huntington Bancshares Inc.
+  - ULTA  # Ulta Beauty Inc.
+  - CBRE  # CBRE Group Inc.
+  - HSY   # Hershey Company
+  - ALGN  # Align Technology Inc.
+  - ENPH  # Enphase Energy Inc.
+  - TTWO  # Take-Two Interactive Software Inc.
+  - TSCO  # Tractor Supply Company
+  - CDW   # CDW Corporation
+  - YUM   # Yum! Brands Inc.
+  - EBAY  # eBay Inc.
+  - AEP   # American Electric Power Company Inc.
+  - EW    # Edwards Lifesciences Corporation
+  - SNOW  # Snowflake Inc.
+  - ED    # Consolidated Edison Inc.
+  - STLD  # Steel Dynamics Inc.
+  - WST   # West Pharmaceutical Services Inc.
+  - TEAM  # Atlassian Corporation
+  - RVTY  # Revvity Inc.
+  - APTV  # Aptiv PLC
+  - PLTR  # Palantir Technologies Inc.
+  - VRSN  # VeriSign Inc.
+  - NTRS  # Northern Trust Corporation
+  - TRGP  # Targa Resources Corp.
+  - PODD  # Insulet Corporation
+  - AXON  # Axon Enterprise Inc.
+  - NTAP  # NetApp Inc.
+  - HOLX  # Hologic Inc.
+  - HUBB  # Hubbell Incorporated
+  - ACGL  # Arch Capital Group Ltd.
+  - GEHC  # GE HealthCare Technologies Inc.
+  - FANG  # Diamondback Energy Inc.
+  - FICO  # Fair Isaac Corporation
+  - URI   # United Rentals Inc.
+  - MPWR  # Monolithic Power Systems Inc.
+  - DLR   # Digital Realty Trust Inc.
+  - TROW  # T. Rowe Price Group Inc.
+  - HBAN  # Huntington Bancshares Inc.
+  - ULTA  # Ulta Beauty Inc.
+  - CBRE  # CBRE Group Inc.
+  - HSY   # Hershey Company
+  - ALGN  # Align Technology Inc.
+  - ENPH  # Enphase Energy Inc.
+  - TTWO  # Take-Two Interactive Software Inc.
+  - TSCO  # Tractor Supply Company
+  - CDW   # CDW Corporation
+  - YUM   # Yum! Brands Inc.
+  - EBAY  # eBay Inc.
+  - AEP   # American Electric Power Company Inc.
+  - EW    # Edwards Lifesciences Corporation
+  - SNOW  # Snowflake Inc.
+  - ED    # Consolidated Edison Inc.
+  - STLD  # Steel Dynamics Inc.
+  - WST   # West Pharmaceutical Services Inc.
+  - TEAM  # Atlassian Corporation
+  - RVTY  # Revvity Inc.
+  - APTV  # Aptiv PLC
+  - PLTR  # Palantir Technologies Inc.
+  - VRSN  # VeriSign Inc.
+  - NTRS  # Northern Trust Corporation
+  - TRGP  # Targa Resources Corp.
+  - PODD  # Insulet Corporation
+  - AXON  # Axon Enterprise Inc.
+  - NTAP  # NetApp Inc.
+  - HOLX  # Hologic Inc.
+  - HUBB  # Hubbell Incorporated
+
+# EUROSTOXX 600 Tickers (Major European stocks)
+eurostoxx:
+  - ASML.AS  # ASML Holding N.V.
+  - LVMH.PA  # LVMH Moët Hennessy Louis Vuitton SE
+  - NOVO-B.CO  # Novo Nordisk A/S
+  - SAP.DE  # SAP SE
+  - NESN.SW  # Nestlé S.A.
+  - ROG.SW  # Roche Holding AG
+  - NOVN.SW  # Novartis AG
+  - AZN.L  # AstraZeneca PLC
+  - SHEL.L  # Shell plc
+  - HSBA.L  # HSBC Holdings plc
+  - SIE.DE  # Siemens AG
+  - TTE.PA  # TotalEnergies SE
+  - SAN.PA  # Sanofi
+  - BHP.L  # BHP Group Limited
+  - GSK.L  # GSK plc
+  - RIO.L  # Rio Tinto Group
+  - BARC.L  # Barclays PLC
+  - LLOY.L  # Lloyds Banking Group plc
+  - ULVR.L  # Unilever PLC
+  - BP.L  # BP p.l.c.
+  - VOD.L  # Vodafone Group Plc
+  - BNP.PA  # BNP Paribas SA
+  - AIR.PA  # Airbus SE
+  - ENEL.MI  # Enel SpA
+  - ISP.MI  # Intesa Sanpaolo S.p.A.
+  - UCG.MI  # UniCredit S.p.A.
+  - ENI.MI  # Eni S.p.A.
+  - BBVA.MC  # Banco Bilbao Vizcaya Argentaria, S.A.
+  - SAN.MC  # Banco Santander, S.A.
+  - IBE.MC  # Iberdrola, S.A.
+  - ALV.DE  # Allianz SE
+  - BAS.DE  # BASF SE
+  - BMW.DE  # Bayerische Motoren Werke AG
+  - DAI.DE  # Mercedes-Benz Group AG
+  - DTE.DE  # Deutsche Telekom AG
+  - VOW3.DE  # Volkswagen AG
+  - RWE.DE  # RWE AG
+  - ABN.AS  # ABN AMRO Bank N.V.
+  - INGA.AS  # ING Groep N.V.
+  - PHIA.AS  # Koninklijke Philips N.V.
+  - UNA.AS  # Unilever N.V.
+  - ACA.PA  # Crédit Agricole S.A.
+  - CS.PA  # AXA S.A.
+  - DG.PA  # Vinci S.A.
+  - MC.PA  # LVMH Moët Hennessy Louis Vuitton SE
+  - OR.PA  # L'Oréal S.A.
+  - RI.PA  # Pernod Ricard SA
+  - SU.PA  # Schneider Electric S.E.
+  - DANSKE.CO  # Danske Bank A/S
+  - MAERSK-B.CO  # A.P. Møller - Mærsk A/S
+  - ATCO-A.ST  # Atlas Copco AB
+  - ERIC-B.ST  # Telefonaktiebolaget LM Ericsson
+  - SAND.ST  # Sandvik AB
+  - VOLV-B.ST  # AB Volvo
+  - DNB.OL  # DNB Bank ASA
+  - EQNR.OL  # Equinor ASA
+  - NOKIA.HE  # Nokia Oyj
+  - SAMPO.HE  # Sampo Oyj
+  - ZURN.SW  # Zurich Insurance Group AG
+  - CSGN.SW  # Credit Suisse Group AG
+  - UHR.SW  # The Swatch Group AG
+  - ABBN.SW  # ABB Ltd
+  - LONN.SW  # Lonza Group AG
+  - SREN.SW  # Swiss Re AG
+
+# Nikkei 225 Tickers (Major Japanese stocks)
+nikkei:
+  - 7203.T  # Toyota Motor Corporation
+  - 9984.T  # SoftBank Group Corp.
+  - 6758.T  # Sony Group Corporation
+  - 6861.T  # Keyence Corporation
+  - 9432.T  # Nippon Telegraph and Telephone Corporation
+  - 6367.T  # Daikin Industries, Ltd.
+  - 8306.T  # Mitsubishi UFJ Financial Group, Inc.
+  - 4063.T  # Shin-Etsu Chemical Co., Ltd.
+  - 9433.T  # KDDI Corporation
+  - 7974.T  # Nintendo Co., Ltd.
+  - 6501.T  # Hitachi, Ltd.
+  - 6098.T  # Recruit Holdings Co., Ltd.
+  - 9983.T  # Fast Retailing Co., Ltd.
+  - 4519.T  # Chugai Pharmaceutical Co., Ltd.
+  - 8316.T  # Sumitomo Mitsui Financial Group, Inc.
+  - 6902.T  # DENSO Corporation
+  - 6273.T  # SMC Corporation
+  - 4502.T  # Takeda Pharmaceutical Company Limited
+  - 8035.T  # Tokyo Electron Limited
+  - 4568.T  # Daiichi Sankyo Company, Limited
+  - 7267.T  # Honda Motor Co., Ltd.
+  - 7751.T  # Canon Inc.
+  - 8001.T  # Itochu Corporation
+  - 5401.T  # Nippon Steel Corporation
+  - 9022.T  # Central Japan Railway Company
+  - 2914.T  # Japan Tobacco Inc.
+  - 7011.T  # Mitsubishi Heavy Industries, Ltd.
+  - 8058.T  # Mitsubishi Corporation
+  - 6981.T  # Murata Manufacturing Co., Ltd.
+  - 8031.T  # Mitsui & Co., Ltd.
+  - 6594.T  # Nidec Corporation
+  - 8267.T  # Aeon Co., Ltd.
+  - 9613.T  # NTT Data Group Corporation
+  - 2802.T  # Ajinomoto Co., Inc.
+  - 7733.T  # Olympus Corporation
+  - 3382.T  # Seven & i Holdings Co., Ltd.
+  - 6752.T  # Panasonic Holdings Corporation
+  - 7201.T  # Nissan Motor Co., Ltd.
+  - 8604.T  # Nomura Holdings, Inc.
+  - 6503.T  # Mitsubishi Electric Corporation
+  - 9020.T  # East Japan Railway Company
+  - 9021.T  # West Japan Railway Company
+  - 6301.T  # Komatsu Ltd.
+  - 4543.T  # Terumo Corporation
+  - 4507.T  # Shionogi & Co., Ltd.
+  - 5108.T  # Bridgestone Corporation
+  - 3659.T  # NEXON Co., Ltd.
+  - 7270.T  # Subaru Corporation
+  - 5020.T  # ENEOS Holdings, Inc.
+  - 5101.T  # The Yokohama Rubber Company, Limited
+  - 5202.T  # Nippon Sheet Glass Company, Limited
+  - 5214.T  # Nippon Electric Glass Co., Ltd.
+  - 5232.T  # Sumitomo Osaka Cement Co., Ltd.
+  - 5233.T  # Taiheiyo Cement Corporation
+  - 5301.T  # Tokai Carbon Co., Ltd.
+  - 5332.T  # TOTO Ltd.
+  - 5333.T  # NGK Insulators, Ltd.
+  - 5706.T  # Mitsui Mining and Smelting Company, Limited
+  - 5707.T  # Toho Zinc Co., Ltd.
+  - 5711.T  # Mitsubishi Materials Corporation
+  - 5713.T  # Sumitomo Metal Mining Co., Ltd.
+  - 5714.T  # DOWA Holdings Co., Ltd.
+  - 5801.T  # Furukawa Electric Co., Ltd.
+  - 5802.T  # Sumitomo Electric Industries, Ltd.
+  - 5803.T  # Fujikura Ltd.
+  - 5901.T  # Toyo Seikan Group Holdings, Ltd.
+  - 6103.T  # Okuma Corporation
+  - 6113.T  # Amada Co., Ltd.
+  - 6302.T  # Sumitomo Heavy Industries, Ltd.
+  - 6305.T  # Hitachi Construction Machinery Co., Ltd.
+  - 6326.T  # Kubota Corporation
+  - 6361.T  # Ebara Corporation
+  - 6471.T  # NSK Ltd.
+  - 6472.T  # NTN Corporation
+  - 6473.T  # JTEKT Corporation
+  - 6479.T  # Minebea Mitsumi Inc.
+  - 6674.T  # GS Yuasa Corporation
+  - 6701.T  # NEC Corporation
+  - 6702.T  # Fujitsu Limited
+  - 6703.T  # Oki Electric Industry Co., Ltd.
+  - 6724.T  # Seiko Epson Corporation
+  - 6762.T  # TDK Corporation
+  - 6770.T  # Alps Alpine Co., Ltd.
+  - 6841.T  # Yokogawa Electric Corporation
+  - 6857.T  # Advantest Corporation
+  - 6952.T  # Casio Computer Co., Ltd.
+  - 6954.T  # Fanuc Corporation
+  - 6971.T  # Kyocera Corporation
+  - 6976.T  # Taiyo Yuden Co., Ltd.
+  - 7003.T  # Mitsui E&S Holdings Co., Ltd.
+  - 7004.T  # Hitachi Zosen Corporation
+  - 7012.T  # Kawasaki Heavy Industries, Ltd.
+  - 7013.T  # IHI Corporation
+  - 7186.T  # Concordia Financial Group, Ltd.
+  - 7202.T  # Isuzu Motors Limited
+  - 7205.T  # Hino Motors, Ltd.
+  - 7211.T  # Mitsubishi Motors Corporation
+  - 7261.T  # Mazda Motor Corporation
+  - 7269.T  # Suzuki Motor Corporation
+  - 7272.T  # Yamaha Motor Co., Ltd.
+  - 7731.T  # NIKON CORPORATION
+  - 7735.T  # SCREEN Holdings Co., Ltd.
+  - 7752.T  # Ricoh Company, Ltd.
+  - 7762.T  # Citizen Watch Co., Ltd.
+  - 7832.T  # Bandai Namco Holdings Inc.
+  - 7911.T  # Toppan Inc.
+  - 7912.T  # Dai Nippon Printing Co., Ltd.
+  - 7951.T  # Yamaha Corporation
+  - 8001.T  # Itochu Corporation
+  - 8002.T  # Marubeni Corporation
+  - 8015.T  # Toyota Tsusho Corporation
+  - 8053.T  # Sumitomo Corporation
+  - 8233.T  # Takashimaya Company, Limited
+  - 8252.T  # Marui Group Co., Ltd.
+  - 8253.T  # Credit Saison Co., Ltd.
+  - 8303.T  # Shinsei Bank, Limited
+  - 8304.T  # Aozora Bank, Ltd.
+  - 8308.T  # Resona Holdings, Inc.
+  - 8309.T  # Sumitomo Mitsui Trust Holdings, Inc.
+  - 8331.T  # The Chiba Bank, Ltd.
+  - 8354.T  # Fukuoka Financial Group, Inc.
+  - 8355.T  # The Shizuoka Bank, Ltd.
+  - 8411.T  # Mizuho Financial Group, Inc.
+  - 8601.T  # Daiwa Securities Group Inc.
+  - 8628.T  # Matsui Securities Co., Ltd.
+  - 8630.T  # Sompo Holdings, Inc.
+  - 8725.T  # MS&AD Insurance Group Holdings, Inc.
+  - 8729.T  # Sony Financial Group Inc.
+  - 8750.T  # The Dai-ichi Life Insurance Company, Limited
+  - 8766.T  # Tokio Marine Holdings, Inc.
+  - 8795.T  # T&D Holdings, Inc.
+  - 8801.T  # Mitsui Fudosan Co., Ltd.
+  - 8802.T  # Mitsubishi Estate Company, Limited
+  - 8804.T  # Tokyo Tatemono Co., Ltd.
+  - 8830.T  # Sumitomo Realty & Development Co., Ltd.
+  - 9001.T  # Tobu Railway Co., Ltd.
+  - 9005.T  # Tokyu Corporation
+  - 9007.T  # Odakyu Electric Railway Co., Ltd.
+  - 9008.T  # Keio Corporation
+  - 9009.T  # Keisei Electric Railway Co., Ltd.
+  - 9062.T  # Nippon Express Holdings, Inc.
+  - 9064.T  # Yamato Holdings Co., Ltd.
+  - 9101.T  # Nippon Yusen Kabushiki Kaisha
+  - 9104.T  # Mitsui O.S.K. Lines, Ltd.
+  - 9107.T  # Kawasaki Kisen Kaisha, Ltd.
+  - 9202.T  # ANA HOLDINGS INC.
+  - 9301.T  # Mitsubishi Logistics Corporation
+  - 9412.T  # Sky Perfect JSAT Holdings Inc.
+  - 9434.T  # SoftBank Corp.
+  - 9501.T  # Tokyo Electric Power Company Holdings, Incorporated
+  - 9502.T  # Chubu Electric Power Company, Incorporated
+  - 9503.T  # The Kansai Electric Power Company, Incorporated
+  - 9531.T  # Tokyo Gas Co., Ltd.
+  - 9532.T  # Osaka Gas Co., Ltd.
+  - 9602.T  # Toho Co., Ltd.
+  - 9735.T  # SECOM CO., LTD.
+  - 9766.T  # KONAMI GROUP CORPORATION
+  - 9843.T  # Nitori Holdings Co., Ltd.
+  - 9983.T  # Fast Retailing Co., Ltd.

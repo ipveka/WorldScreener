@@ -38,7 +38,7 @@ class Screener:
         
         logger.info("Screener initialized")
     
-    def screen_stocks(self, region='europe', criteria=None, limit=30):
+    def screen_stocks(self, region='europe', criteria=None, limit=500, include_sectors=None, exclude_sectors=None):
         """
         Screen stocks according to value investing criteria.
         
@@ -46,6 +46,8 @@ class Screener:
             region (str): Region to screen ('spain', 'europe', 'eurozone', 'us', 'global')
             criteria (dict, optional): Screening criteria to override defaults
             limit (int): Maximum number of results to return
+            include_sectors (list, optional): List of sectors to include in screening
+            exclude_sectors (list, optional): List of sectors to exclude from screening
             
         Returns:
             pandas.DataFrame: DataFrame with screened stock data
@@ -58,7 +60,12 @@ class Screener:
             screen_criteria.update(criteria)
         
         # Get constituents for the specified region
-        constituents = self.data_provider.get_index_constituents(region, self.config)
+        # For Japan, directly use fetch_real_index_constituents
+        if region.lower() == 'japan':
+            constituents = self.data_provider.fetch_real_index_constituents('japan')
+        else:
+            constituents = self.data_provider.get_index_constituents(region, self.config)
+            
         if not constituents:
             logger.error(f"No constituents found for region: {region}")
             return pd.DataFrame()
@@ -76,6 +83,10 @@ class Screener:
         
         # Apply screening criteria
         screened_stocks = self._apply_criteria(stock_data, screen_criteria)
+        
+        # Apply sector filtering
+        if include_sectors or exclude_sectors:
+            screened_stocks = self._filter_by_sector(screened_stocks, include_sectors, exclude_sectors)
         
         # Sort by value score (descending)
         sorted_stocks = screened_stocks.sort_values(by='value_score', ascending=False)
@@ -147,6 +158,38 @@ class Screener:
             ]
         
         return filtered_data
+    
+    def _filter_by_sector(self, stocks_df, include_sectors=None, exclude_sectors=None):
+        """
+        Filter stocks by sector.
+        
+        Args:
+            stocks_df (pandas.DataFrame): DataFrame of stocks
+            include_sectors (list, optional): List of sectors to include
+            exclude_sectors (list, optional): List of sectors to exclude
+            
+        Returns:
+            pandas.DataFrame: Filtered stocks
+        """
+        if stocks_df.empty or 'sector' not in stocks_df.columns:
+            return stocks_df
+        
+        # Make a copy to avoid modifying the original
+        filtered_df = stocks_df.copy()
+        
+        # Apply sector inclusion filter
+        if include_sectors:
+            include_sectors = [s.lower() for s in include_sectors]
+            filtered_df = filtered_df[filtered_df['sector'].str.lower().isin(include_sectors)]
+            logger.info(f"Applied sector inclusion filter. {len(filtered_df)} stocks remaining.")
+        
+        # Apply sector exclusion filter
+        if exclude_sectors:
+            exclude_sectors = [s.lower() for s in exclude_sectors]
+            filtered_df = filtered_df[~filtered_df['sector'].str.lower().isin(exclude_sectors)]
+            logger.info(f"Applied sector exclusion filter. {len(filtered_df)} stocks remaining.")
+        
+        return filtered_df
     
     def filter_by_sector(self, df, sectors):
         """

@@ -49,23 +49,71 @@ class Analyzer:
         # Get basic stock data
         stock = self.data_provider.get_stock_data([ticker])
         if stock.empty:
-            logger.error(f"No information available for {ticker}")
+            logger.error(f"No data found for {ticker}")
             return {}
         
-        # Convert DataFrame row to dictionary
+        # Extract stock data
         stock_data = stock.iloc[0].to_dict()
         
-        # Get historical data
-        hist = self.data_provider.get_stock_history(ticker, period="3y")
+        # Add price field for compatibility with templates
+        if 'current_price' in stock_data and 'price' not in stock_data:
+            stock_data['price'] = stock_data['current_price']
+        
+        # Get historical price data
+        try:
+            history = self.data_provider.get_stock_history(ticker, period="1y")
+            if not history.empty:
+                # Calculate additional metrics
+                stock_data['price_history'] = history
+                
+                # Calculate moving averages
+                history['MA50'] = history['Close'].rolling(window=50).mean()
+                history['MA200'] = history['Close'].rolling(window=200).mean()
+                
+                # Calculate price momentum
+                if len(history) > 20:
+                    stock_data['momentum_1m'] = (history['Close'].iloc[-1] / history['Close'].iloc[-20] - 1) * 100
+                else:
+                    stock_data['momentum_1m'] = 0
+                    
+                if len(history) > 60:
+                    stock_data['momentum_3m'] = (history['Close'].iloc[-1] / history['Close'].iloc[-60] - 1) * 100
+                else:
+                    stock_data['momentum_3m'] = 0
+                    
+                if len(history) > 120:
+                    stock_data['momentum_6m'] = (history['Close'].iloc[-1] / history['Close'].iloc[-120] - 1) * 100
+                else:
+                    stock_data['momentum_6m'] = 0
+                    
+                # Calculate volatility
+                stock_data['volatility'] = history['Close'].pct_change().std() * (252 ** 0.5) * 100  # Annualized
+                
+                # Calculate drawdown
+                rolling_max = history['Close'].cummax()
+                drawdown = (history['Close'] / rolling_max - 1) * 100
+                stock_data['max_drawdown'] = drawdown.min()
+        except Exception as e:
+            logger.error(f"Error getting historical data for {ticker}: {e}")
+            stock_data['price_history'] = pd.DataFrame()
+            stock_data['momentum_1m'] = 0
+            stock_data['momentum_3m'] = 0
+            stock_data['momentum_6m'] = 0
+            stock_data['volatility'] = 0
+            stock_data['max_drawdown'] = 0
         
         # Get financial statements
         financials = self.data_provider.get_stock_financials(ticker)
         
         # Create detailed metrics
-        metrics = self._create_detailed_metrics(ticker, stock_data, hist, financials)
+        metrics = self._create_detailed_metrics(ticker, stock_data, history, financials)
         
         # Assess stock value
         metrics = self._assess_value(metrics)
+        
+        # Ensure key fields are included for the report generator
+        metrics['ticker'] = ticker
+        metrics['name'] = stock_data.get('name', ticker)
         
         return metrics
     
@@ -91,7 +139,7 @@ class Analyzer:
             'Country': stock_data.get('country', 'N/A'),
             'Exchange': stock_data.get('exchange', 'N/A'),
             'Currency': stock_data.get('currency', 'N/A'),
-            'Current Price': stock_data.get('price', 'N/A'),
+            'Current Price': stock_data.get('current_price', 'N/A'),
             'Market Cap': stock_data.get('market_cap', 'N/A'),
             'P/E Ratio': stock_data.get('pe_ratio', 'N/A'),
             'P/B Ratio': stock_data.get('pb_ratio', 'N/A'),
@@ -267,7 +315,7 @@ class Analyzer:
         
         # Select key metrics for comparison
         comparison_metrics = [
-            'ticker', 'name', 'sector', 'country', 'price', 
+            'ticker', 'name', 'sector', 'country', 'current_price', 
             'pe_ratio', 'pb_ratio', 'dividend_yield', 'roe', 
             'debt_to_equity', 'value_score'
         ]

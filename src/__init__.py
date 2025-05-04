@@ -7,6 +7,13 @@ This package provides tools to screen, analyze, and visualize value stocks
 across European and US markets.
 """
 
+# Suppress urllib3 warnings - must be done before other imports
+import warnings
+import urllib3
+warnings.filterwarnings('ignore', category=urllib3.exceptions.NotOpenSSLWarning)
+warnings.filterwarnings('ignore', message=".*OpenSSL.*")
+urllib3.disable_warnings()
+
 import logging
 from .data_provider import DataProvider
 from .screener import Screener
@@ -25,13 +32,12 @@ logger = logging.getLogger(__name__)
 setup_logging()
 
 
-def create_screener(config_path=None, use_mock_data=True):
+def create_screener(config_path=None):
     """
     Create a WorldScreener instance with all components.
     
     Args:
         config_path (str, optional): Path to configuration file
-        use_mock_data (bool, optional): Whether to use mock data for demonstrations
         
     Returns:
         tuple: (DataProvider, Screener, Analyzer, Visualizer, ReportGenerator)
@@ -40,7 +46,7 @@ def create_screener(config_path=None, use_mock_data=True):
     config = load_config(config_path)
     
     # Initialize components
-    data_provider = DataProvider(config=config, use_mock_data=use_mock_data)
+    data_provider = DataProvider(config=config)
     screener = Screener(data_provider, config)
     analyzer = Analyzer(data_provider)
     visualizer = Visualizer()

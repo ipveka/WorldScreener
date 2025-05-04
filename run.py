@@ -117,8 +117,8 @@ def main():
     # Global options
     parser.add_argument('--config', type=str, default=None, 
                         help='Path to custom configuration file')
-    parser.add_argument('--api-key', type=str, 
-                        help='API key for financial data provider')
+    parser.add_argument('--use-real-data', action='store_true', 
+                        help='Use real data instead of mock data')
     parser.add_argument('--verbose', action='store_true', 
                         help='Enable verbose logging')
     parser.add_argument('--version', action='version', version='WorldScreener 1.0.0',
@@ -138,10 +138,16 @@ def main():
             os.makedirs(output_dir, exist_ok=True)
     
     # Initialize screener
-    data_provider, screener, analyzer, visualizer, report_generator = create_screener(
+    screener = create_screener(
         config_path=getattr(args, 'config', None),
-        api_key=args.api_key
+        use_mock_data=not getattr(args, 'use_real_data', False)
     )
+    
+    # Extract components from screener
+    data_provider = screener.data_provider
+    analyzer = screener.analyzer
+    visualizer = screener.visualizer
+    report_generator = screener.report_generator
     
     # Load config
     config = load_config(getattr(args, 'config', None))

@@ -1,7 +1,5 @@
 # WorldScreener
 
-![WorldScreener Logo](https://via.placeholder.com/800x200?text=WorldScreener:+Value+Stock+Screening+Tool)
-
 **A comprehensive stock screening tool for value investors focused on European and US markets.**
 
 ## Overview
@@ -18,6 +16,8 @@ With WorldScreener, you can:
 - Generate reports in multiple formats (text, CSV, JSON, HTML, Excel)
 - Build and analyze value portfolios
 - Compare stocks across different regions with the new comparative analysis feature
+- Filter stocks by sector (include or exclude specific sectors)
+- View market cap values in US dollars for consistent comparison across regions
 
 ## Installation
 
@@ -62,6 +62,10 @@ python run.py screen --region spain --max-pe 12 --min-div 4 --min-roe 12
 
 # Screen stocks with visualization
 python run.py screen --region eurozone --visualize sector_breakdown --plot-file sectors.png
+
+# Screen with sector filtering
+python run.py screen --region europe --include-sectors "Technology,Healthcare" --output-file tech_health.html
+python run.py screen --region us --exclude-sectors "Utilities,Real Estate" --output-file no_util_realestate.html
 ```
 
 #### Analyzing Stocks
@@ -134,6 +138,13 @@ custom_criteria = {
     'max_debt_to_equity': 0.8
 }
 results = screener.screen_stocks(region='spain', criteria=custom_criteria)
+
+# Apply sector filtering
+sector_filtered_results = screener.screen_stocks(
+    region='us', 
+    include_sectors=['Technology', 'Healthcare'],
+    exclude_sectors=['Utilities']
+)
 
 # Analyze a stock
 analysis = analyzer.analyze_stock('SAN.MC')
@@ -219,6 +230,12 @@ All demo outputs are saved to the `output` directory.
 - **Caching system**: Efficient data caching to minimize API calls and improve performance
 - **Highly configurable**: Customize screening criteria, value score weights, and more
 
+### Latest Enhancements
+- **Comprehensive Stock Coverage**: Now includes tickers from S&P 500, EUROSTOXX 600, and Nikkei 225 indices stored in a centralized YAML configuration file
+- **Sector Filtering**: Easily include or exclude specific sectors from your screening results
+- **Comparative Analysis**: Generate detailed reports comparing stocks across different regions
+- **Standardized Market Cap Display**: All market cap values are displayed in US dollars for consistent comparison across regions
+
 ## Project Structure
 
 ```
@@ -238,7 +255,8 @@ worldscreener/
 │
 ├── config/                       # Configuration files
 │   ├── default_config.yaml       # Default screening criteria
-│   └── markets_config.yaml       # Market indices and country information
+│   ├── markets_config.yaml       # Market indices and country information
+│   └── tickers.yaml              # Ticker symbols for various markets
 │
 ├── templates/                    # HTML templates
 │   ├── report_template.html      # Basic report template

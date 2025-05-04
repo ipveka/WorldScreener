@@ -16,6 +16,7 @@ import numpy as np
 import yfinance as yf
 import requests
 from dotenv import load_dotenv
+import yaml
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -91,19 +92,31 @@ class DataProvider:
     Data provider class for fetching financial data from various sources.
     """
     
-    def __init__(self, config=None, cache_duration=24, use_mock_data=True):
+    def __init__(self, config=None):
         """
         Initialize the data provider.
         
         Args:
             config (dict, optional): Configuration dictionary
-            cache_duration (int, optional): Cache duration in hours
-            use_mock_data (bool, optional): Whether to use mock data for demonstrations
         """
-        self.config = config or {}
-        self.cache = DataCache(cache_duration)
-        self.use_mock_data = use_mock_data
-        logger.info("DataProvider initialized")
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("DataProvider initialized")
+        self.config = config
+        self.data_cache = DataCache()
+        self.tickers = self._load_tickers_from_yaml()
+    
+    def _load_tickers_from_yaml(self):
+        """Load tickers from the tickers.yaml file."""
+        tickers_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'tickers.yaml')
+        try:
+            with open(tickers_path, 'r') as file:
+                tickers_data = yaml.safe_load(file)
+                self.logger.info(f"Loaded tickers from {tickers_path}")
+                return tickers_data
+        except Exception as e:
+            self.logger.error(f"Error loading tickers from {tickers_path}: {e}")
+            # Return empty default structure if file can't be loaded
+            return {"sp500": [], "eurostoxx": [], "nikkei": []}
     
     def get_market_indices(self, config):
         """
@@ -128,61 +141,64 @@ class DataProvider:
         Returns:
             list: List of ticker symbols for the index constituents
         """
-        market_indices = self.get_market_indices(config)
-        index_symbol = market_indices.get(index.lower())
-        
-        if not index_symbol:
-            logger.error(f"Unknown index: {index}")
-            return []
-            
-        cache_key = f"index_{index}"
-        if self.cache.is_cached(cache_key):
-            return self.cache.get_from_cache(cache_key)
-            
         try:
-            # First try to get stocks directly from config
-            if 'markets' in config and index.lower() in config['markets'] and 'stocks' in config['markets'][index.lower()]:
-                constituents = config['markets'][index.lower()]['stocks']
+            # Normalize index to lowercase
+            index = index.lower()
+            
+            # Create cache key
+            cache_key = f"constituents_{index}"
+            
+            # Check cache first
+            if self.data_cache.is_cached(cache_key):
+                return self.data_cache.get_from_cache(cache_key)
+            
+            # For predefined regions, use the fetch_real_index_constituents method
+            if index in ['us', 'europe', 'japan', 'global']:
+                constituents = self.fetch_real_index_constituents(index)
+                if constituents:
+                    logger.info(f"Using {len(constituents)} real stocks for {index}")
+                    self.data_cache.add_to_cache(cache_key, constituents)
+                    return constituents
+            
+            # Get market indices from config as fallback
+            market_indices = self.get_market_indices(config)
+            
+            # Check if index exists in config
+            if index in market_indices:
+                # Get constituents from config
+                constituents = market_indices[index]
                 logger.info(f"Using {len(constituents)} stocks from config for {index}")
-            # Then try the indices section
-            elif 'indices' in config and index.lower() in config['indices']:
-                constituents = config['indices'][index.lower()]
-                logger.info(f"Using {len(constituents)} stocks from indices config for {index}")
+                self.data_cache.add_to_cache(cache_key, constituents)
+                return constituents
             else:
-                # Fallback to hardcoded lists for demo purposes
-                if index.lower() == 'spain':
-                    constituents = [
-                        "SAN.MC", "BBVA.MC", "TEF.MC", "IBE.MC", "REP.MC", 
-                        "ITX.MC", "AMS.MC", "FER.MC", "ELE.MC", "CABK.MC"
-                    ]
-                elif index.lower() == 'europe':
-                    constituents = [
-                        "ASML.AS", "SAP.DE", "SIE.DE", "LVMH.PA", "ROG.SW",
-                        "NOVN.SW", "NESN.SW", "AZN.L", "ULVR.L", "RIO.L"
-                    ]
-                elif index.lower() == 'eurozone':
-                    constituents = [
-                        "ASML.AS", "SAP.DE", "SIE.DE", "LVMH.PA", "MC.PA",
-                        "BNP.PA", "SAN.MC", "BBVA.MC", "ISP.MI", "EBS.VI"
-                    ]
-                elif index.lower() == 'us':
-                    constituents = [
-                        "AAPL", "MSFT", "GOOGL", "AMZN", "BRK-B",
-                        "JNJ", "JPM", "PG", "XOM", "KO"
-                    ]
-                else:  # global
-                    constituents = [
-                        "AAPL", "MSFT", "GOOGL", "AMZN", "ASML.AS",
-                        "SAP.DE", "LVMH.PA", "SAN.MC", "AZN.L", "NESN.SW"
-                    ]
-                logger.info(f"Using {len(constituents)} hardcoded stocks for {index}")
-                    
-            # Cache the results
-            self.cache.add_to_cache(cache_key, constituents)
-            return constituents
+                logger.error(f"Unknown index: {index}")
+                return []
                 
         except Exception as e:
             logger.error(f"Error getting index constituents: {e}")
+            return []
+    
+    def fetch_real_index_constituents(self, region):
+        """Fetch real index constituents for a given region."""
+        self.logger.info(f"Fetching constituents for region: {region}")
+        
+        if region.lower() == 'us':
+            tickers = self.tickers.get('sp500', [])
+            self.logger.info(f"Using {len(tickers)} real stocks for {region} from tickers.yaml")
+            return tickers
+        
+        elif region.lower() == 'europe':
+            tickers = self.tickers.get('eurostoxx', [])
+            self.logger.info(f"Using {len(tickers)} real stocks for {region} from tickers.yaml")
+            return tickers
+        
+        elif region.lower() == 'japan':
+            tickers = self.tickers.get('nikkei', [])
+            self.logger.info(f"Using {len(tickers)} real stocks for {region} from tickers.yaml")
+            return tickers
+        
+        else:
+            self.logger.warning(f"Unknown region: {region}. Returning empty list.")
             return []
     
     def get_stock_data(self, ticker_list, threads=10):
@@ -241,250 +257,215 @@ class DataProvider:
         
         for ticker in ticker_chunk:
             try:
-                # If mock data is enabled, use it directly without trying the API
-                if self.use_mock_data:
-                    info = self._generate_mock_data(ticker)
-                    results.append(info)
-                    continue
+                # Create a Ticker object
+                yf_ticker = yf.Ticker(ticker)
                 
-                # Otherwise try the API first
-                stock = yf.Ticker(ticker)
-                info = stock.info
+                # Get basic info
+                info = {}
                 
-                # If the API fails, generate mock data
-                if not info or 'regularMarketPrice' not in info:
-                    logger.debug(f"Insufficient data for {ticker}, using mock data for demo")
-                    info = self._generate_mock_data(ticker)
-                else:
-                    # Extract country from info or infer from ticker suffix
-                    country = info.get('country', '')
-                    if not country:
-                        # Try to infer from ticker suffix
-                        if ticker.endswith('.MC') or ticker.endswith('.MA'):
-                            country = 'ES'  # Spain
-                        elif ticker.endswith('.DE') or ticker.endswith('.F'):
-                            country = 'DE'  # Germany
-                        elif ticker.endswith('.PA'):
-                            country = 'FR'  # France
-                        elif ticker.endswith('.MI'):
-                            country = 'IT'  # Italy
-                        elif ticker.endswith('.L'):
-                            country = 'GB'  # UK
-                        elif ticker.endswith('.AS'):
-                            country = 'NL'  # Netherlands
-                        elif ticker.endswith('.SW'):
-                            country = 'CH'  # Switzerland
-                        elif ticker.endswith('.VI'):
-                            country = 'AT'  # Austria
-                        else:
-                            country = 'US'  # Default to US
+                # Try to get info from Yahoo Finance
+                try:
+                    # Get ticker info
+                    ticker_info = yf_ticker.info
                     
-                    # Get key metrics
-                    market_price = info.get('regularMarketPrice', 0)
-                    
-                    # Extract fundamentals
-                    pe_ratio = info.get('trailingPE', info.get('forwardPE', 0))
-                    pb_ratio = info.get('priceToBook', 0)
-                    
-                    # Handle dividend yield - convert from decimal to percentage
-                    # Yahoo Finance sometimes returns this as a percentage already
-                    dividend_yield = info.get('dividendYield', 0)
-                    if dividend_yield > 0:
-                        # If it's greater than 1, it's likely already a percentage
-                        if dividend_yield > 1 and dividend_yield < 100:
-                            # Already a percentage, keep as is
-                            pass
-                        else:
-                            # Convert from decimal to percentage (e.g., 0.05 -> 5.0)
-                            dividend_yield = dividend_yield * 100
-                    
-                    # Calculate additional metrics
-                    roe = info.get('returnOnEquity', 0)
-                    if roe > 0:
-                        # If it's greater than 1, it's likely already a percentage
-                        if roe > 1 and roe < 100:
-                            # Already a percentage, keep as is
-                            pass
-                        else:
-                            # Convert from decimal to percentage
-                            roe = roe * 100
-                        
-                    # Debt metrics
-                    total_debt = info.get('totalDebt', 0)
-                    total_equity = info.get('totalStockholderEquity', 0)
-                    
-                    debt_to_equity = 0
-                    if total_equity and total_equity > 0:
-                        debt_to_equity = total_debt / total_equity
-                    
-                    # Create stock data dictionary
-                    stock_data = {
+                    # Extract relevant data
+                    info = {
                         'ticker': ticker,
-                        'name': info.get('shortName', ticker),
-                        'sector': info.get('sector', 'Unknown'),
-                        'industry': info.get('industry', 'Unknown'),
-                        'country': country,
-                        'currency': info.get('currency', ''),
-                        'market_cap': info.get('marketCap', 0),
-                        'price': market_price,
-                        'pe_ratio': round(pe_ratio, 2) if pe_ratio else 0,
-                        'pb_ratio': round(pb_ratio, 2) if pb_ratio else 0,
-                        'dividend_yield': round(dividend_yield, 2) if dividend_yield else 0,
-                        'roe': round(roe, 2) if roe else 0,
-                        'debt_to_equity': round(debt_to_equity, 2) if debt_to_equity else 0,
-                        'exchange': info.get('exchange', ''),
-                        'fifty_two_week_high': round(info.get('fiftyTwoWeekHigh', 0), 2),
-                        'fifty_two_week_low': round(info.get('fiftyTwoWeekLow', 0), 2)
+                        'name': ticker_info.get('shortName', ticker_info.get('longName', ticker)),
+                        'sector': ticker_info.get('sector', 'Unknown'),
+                        'industry': ticker_info.get('industry', 'Unknown'),
+                        'country': ticker_info.get('country', self._get_country_from_ticker(ticker)),
+                        'market_cap': self._convert_to_usd(ticker_info.get('marketCap', 0), ticker),
+                        'pe_ratio': ticker_info.get('trailingPE', 0),
+                        'forward_pe': ticker_info.get('forwardPE', 0),
+                        'price_to_sales': ticker_info.get('priceToSalesTrailing12Months', 0),
+                        'price_to_book': ticker_info.get('priceToBook', 0),
+                        'pb_ratio': ticker_info.get('priceToBook', 0),
+                        'dividend_yield': ticker_info.get('dividendYield', 0) * 100 if ticker_info.get('dividendYield') else 0,  # Convert to percentage
+                        'eps': ticker_info.get('trailingEps', 0),
+                        'beta': ticker_info.get('beta', 0),
+                        'fifty_two_week_high': ticker_info.get('fiftyTwoWeekHigh', 0),
+                        'fifty_two_week_low': ticker_info.get('fiftyTwoWeekLow', 0),
+                        'current_price': ticker_info.get('currentPrice', ticker_info.get('regularMarketPrice', 0)),
+                        'target_price': ticker_info.get('targetMeanPrice', 0),
+                        'recommendation': ticker_info.get('recommendationKey', 'Unknown'),
+                        'roe': ticker_info.get('returnOnEquity', 0) * 100 if ticker_info.get('returnOnEquity') else 0,
+                        'roa': ticker_info.get('returnOnAssets', 0) * 100 if ticker_info.get('returnOnAssets') else 0,
+                        'debt_to_equity': ticker_info.get('debtToEquity', 0) / 100 if ticker_info.get('debtToEquity') else 0,
+                        'quick_ratio': ticker_info.get('quickRatio', 0),
+                        'current_ratio': ticker_info.get('currentRatio', 0),
+                        'peg_ratio': ticker_info.get('pegRatio', 0),
+                        'short_ratio': ticker_info.get('shortRatio', 0),
+                        'earnings_growth': ticker_info.get('earningsQuarterlyGrowth', 0) * 100 if ticker_info.get('earningsQuarterlyGrowth') else 0,
+                        'revenue_growth': ticker_info.get('revenueGrowth', 0) * 100 if ticker_info.get('revenueGrowth') else 0,
+                        'gross_margins': ticker_info.get('grossMargins', 0) * 100 if ticker_info.get('grossMargins') else 0,
+                        'ebitda_margins': ticker_info.get('ebitdaMargins', 0) * 100 if ticker_info.get('ebitdaMargins') else 0,
+                        'profit_margins': ticker_info.get('profitMargins', 0) * 100 if ticker_info.get('profitMargins') else 0
                     }
                     
-                    # Add to cache
-                    self.cache.add_to_cache(f"stock_data_{ticker}", stock_data)
-                    
                     # Add to results
-                    results.append(stock_data)
-                
+                    results.append(info)
+                    
+                except Exception as e:
+                    logger.error(f"Error processing {ticker}: {e}")
+                    # Skip this ticker
+                    continue
+                    
             except Exception as e:
                 logger.error(f"Error processing {ticker}: {e}")
-                # Generate mock data on error
-                logger.info(f"Using mock data for {ticker} due to error: {e}")
-                mock_data = self._generate_mock_data(ticker)
-                results.append(mock_data)
-        
+                continue
+                
         return results
         
-    def _generate_mock_data(self, ticker):
+    def _convert_to_usd(self, market_cap, ticker):
         """
-        Generate mock stock data for demonstration purposes.
+        Convert market cap to USD for non-US companies.
+        
+        Args:
+            market_cap (float): Market cap in local currency
+            ticker (str): Stock ticker symbol
+            
+        Returns:
+            float: Market cap in USD
+        """
+        try:
+            # If market cap is 0 or None, return 0
+            if not market_cap:
+                return 0
+                
+            # For US stocks, no conversion needed
+            if '.' not in ticker:
+                return market_cap
+                
+            # Get currency based on ticker suffix
+            currency = self._get_currency_from_ticker(ticker)
+            
+            # If currency is USD, no conversion needed
+            if currency == 'USD':
+                return market_cap
+                
+            # Try to get exchange rate from Yahoo Finance
+            try:
+                # Create currency pair ticker (e.g., EURJPY=X)
+                currency_pair = f"{currency}USD=X"
+                currency_ticker = yf.Ticker(currency_pair)
+                
+                # Get current exchange rate
+                exchange_rate = currency_ticker.history(period='1d')['Close'].iloc[-1]
+                
+                # Convert market cap to USD
+                return market_cap * exchange_rate
+            except Exception as e:
+                logger.warning(f"Error getting exchange rate for {currency}: {e}")
+                
+                # Use approximate exchange rates as fallback
+                exchange_rates = {
+                    'EUR': 1.10,  # Euro to USD
+                    'GBP': 1.30,  # British Pound to USD
+                    'JPY': 0.0067,  # Japanese Yen to USD
+                    'CHF': 1.12,  # Swiss Franc to USD
+                    'SEK': 0.096,  # Swedish Krona to USD
+                    'NOK': 0.094,  # Norwegian Krone to USD
+                    'DKK': 0.15,  # Danish Krone to USD
+                    'AUD': 0.67,  # Australian Dollar to USD
+                    'CAD': 0.74,  # Canadian Dollar to USD
+                    'HKD': 0.13,  # Hong Kong Dollar to USD
+                    'CNY': 0.14,  # Chinese Yuan to USD
+                    'KRW': 0.00075  # South Korean Won to USD
+                }
+                
+                # If currency is in the exchange rates dictionary, convert market cap
+                if currency in exchange_rates:
+                    return market_cap * exchange_rates[currency]
+                else:
+                    # If currency is not in the dictionary, return market cap as is
+                    return market_cap
+                
+        except Exception as e:
+            logger.error(f"Error converting market cap to USD: {e}")
+            return market_cap
+            
+    def _get_currency_from_ticker(self, ticker):
+        """
+        Get currency from ticker symbol based on suffix.
         
         Args:
             ticker (str): Stock ticker symbol
             
         Returns:
-            dict: Mock stock data
+            str: Currency code
         """
-        import random
-        
-        # Extract country from ticker suffix
-        country = 'US'
-        if ticker.endswith('.MC') or ticker.endswith('.MA'):
-            country = 'ES'  # Spain
-        elif ticker.endswith('.DE') or ticker.endswith('.F'):
-            country = 'DE'  # Germany
-        elif ticker.endswith('.PA'):
-            country = 'FR'  # France
-        elif ticker.endswith('.MI'):
-            country = 'IT'  # Italy
+        if ticker.endswith('.T'):
+            return 'JPY'  # Japanese Yen
         elif ticker.endswith('.L'):
-            country = 'GB'  # UK
-        elif ticker.endswith('.AS'):
-            country = 'NL'  # Netherlands
+            return 'GBP'  # British Pound
+        elif ticker.endswith('.DE') or ticker.endswith('.F') or ticker.endswith('.PA') or ticker.endswith('.MI') or ticker.endswith('.AS'):
+            return 'EUR'  # Euro
         elif ticker.endswith('.SW'):
-            country = 'CH'  # Switzerland
+            return 'CHF'  # Swiss Franc
+        elif ticker.endswith('.ST'):
+            return 'SEK'  # Swedish Krona
+        elif ticker.endswith('.OL'):
+            return 'NOK'  # Norwegian Krone
+        elif ticker.endswith('.CO'):
+            return 'DKK'  # Danish Krone
+        elif ticker.endswith('.AX'):
+            return 'AUD'  # Australian Dollar
+        elif ticker.endswith('.TO'):
+            return 'CAD'  # Canadian Dollar
+        elif ticker.endswith('.HK'):
+            return 'HKD'  # Hong Kong Dollar
+        elif ticker.endswith('.SS') or ticker.endswith('.SZ'):
+            return 'CNY'  # Chinese Yuan
+        elif ticker.endswith('.KS'):
+            return 'KRW'  # South Korean Won
+        else:
+            return 'USD'  # US Dollar
+            
+    def _get_country_from_ticker(self, ticker):
+        """
+        Extract country from ticker symbol based on suffix.
         
-        # Map tickers to company names for better demo
-        company_names = {
-            'SAN.MC': 'Banco Santander',
-            'BBVA.MC': 'BBVA',
-            'TEF.MC': 'Telefonica',
-            'IBE.MC': 'Iberdrola',
-            'REP.MC': 'Repsol',
-            'ITX.MC': 'Inditex',
-            'AMS.MC': 'Amadeus',
-            'FER.MC': 'Ferrovial',
-            'ELE.MC': 'Endesa',
-            'CABK.MC': 'CaixaBank',
-            'ASML.AS': 'ASML Holding',
-            'SAP.DE': 'SAP',
-            'SIE.DE': 'Siemens',
-            'LVMH.PA': 'LVMH',
-            'ROG.SW': 'Roche',
-            'NOVN.SW': 'Novartis',
-            'NESN.SW': 'Nestle',
-            'AZN.L': 'AstraZeneca',
-            'ULVR.L': 'Unilever',
-            'RIO.L': 'Rio Tinto',
-            'AAPL': 'Apple',
-            'MSFT': 'Microsoft',
-            'GOOGL': 'Alphabet',
-            'AMZN': 'Amazon',
-            'BRK-B': 'Berkshire Hathaway',
-            'JNJ': 'Johnson & Johnson',
-            'JPM': 'JPMorgan Chase',
-            'PG': 'Procter & Gamble',
-            'XOM': 'Exxon Mobil',
-            'KO': 'Coca-Cola'
-        }
-        
-        # Map tickers to sectors for better demo
-        sector_map = {
-            'SAN.MC': 'Financial Services',
-            'BBVA.MC': 'Financial Services',
-            'TEF.MC': 'Communication Services',
-            'IBE.MC': 'Utilities',
-            'REP.MC': 'Energy',
-            'ITX.MC': 'Consumer Cyclical',
-            'AMS.MC': 'Technology',
-            'FER.MC': 'Industrials',
-            'ELE.MC': 'Utilities',
-            'CABK.MC': 'Financial Services',
-            'ASML.AS': 'Technology',
-            'SAP.DE': 'Technology',
-            'SIE.DE': 'Industrials',
-            'LVMH.PA': 'Consumer Cyclical',
-            'ROG.SW': 'Healthcare',
-            'NOVN.SW': 'Healthcare',
-            'NESN.SW': 'Consumer Defensive',
-            'AZN.L': 'Healthcare',
-            'ULVR.L': 'Consumer Defensive',
-            'RIO.L': 'Basic Materials',
-            'AAPL': 'Technology',
-            'MSFT': 'Technology',
-            'GOOGL': 'Communication Services',
-            'AMZN': 'Consumer Cyclical',
-            'BRK-B': 'Financial Services',
-            'JNJ': 'Healthcare',
-            'JPM': 'Financial Services',
-            'PG': 'Consumer Defensive',
-            'XOM': 'Energy',
-            'KO': 'Consumer Defensive'
-        }
-        
-        # Generate realistic but random values for demonstration
-        name = company_names.get(ticker, f"Company {ticker}")
-        sector = sector_map.get(ticker, random.choice(['Technology', 'Healthcare', 'Financial Services', 'Consumer Cyclical', 'Industrials']))
-        
-        # Generate values that will pass screening criteria for demo purposes
-        pe_ratio = round(random.uniform(8.0, 14.0), 2)
-        pb_ratio = round(random.uniform(0.8, 1.4), 2)
-        dividend_yield = round(random.uniform(3.5, 6.0), 2)
-        roe = round(random.uniform(12.0, 20.0), 2)
-        debt_to_equity = round(random.uniform(0.3, 0.7), 2)
-        price = round(random.uniform(50.0, 500.0), 2)
-        
-        # Calculate value score (higher is better)
-        value_score = 100 - (pe_ratio * 2) - (pb_ratio * 10) + (dividend_yield * 3) + (roe * 0.5) - (debt_to_equity * 10)
-        value_score = round(max(50, min(95, value_score)), 2)  # Ensure between 50-95 for demo
-        
-        # Create mock stock data
-        return {
-            'ticker': ticker,
-            'name': name,
-            'sector': sector,
-            'industry': f"{sector} Industry",
-            'country': country,
-            'currency': 'USD' if country == 'US' else 'EUR',
-            'market_cap': random.randint(5000000000, 500000000000),
-            'price': price,
-            'pe_ratio': pe_ratio,
-            'pb_ratio': pb_ratio,
-            'dividend_yield': dividend_yield,
-            'roe': roe,
-            'debt_to_equity': debt_to_equity,
-            'exchange': 'NYSE' if country == 'US' else 'EURONEXT',
-            'fifty_two_week_high': round(random.uniform(100.0, 600.0), 2),
-            'fifty_two_week_low': round(random.uniform(40.0, 90.0), 2),
-            'value_score': value_score
-        }
+        Args:
+            ticker (str): Stock ticker symbol
+            
+        Returns:
+            str: Country name
+        """
+        if ticker.endswith('.MC') or ticker.endswith('.MA'):
+            return 'Spain'
+        elif ticker.endswith('.DE') or ticker.endswith('.F'):
+            return 'Germany'
+        elif ticker.endswith('.PA'):
+            return 'France'
+        elif ticker.endswith('.MI'):
+            return 'Italy'
+        elif ticker.endswith('.L'):
+            return 'United Kingdom'
+        elif ticker.endswith('.AS'):
+            return 'Netherlands'
+        elif ticker.endswith('.SW'):
+            return 'Switzerland'
+        elif ticker.endswith('.CO'):
+            return 'Denmark'
+        elif ticker.endswith('.ST'):
+            return 'Sweden'
+        elif ticker.endswith('.HE'):
+            return 'Finland'
+        elif ticker.endswith('.OL'):
+            return 'Norway'
+        elif ticker.endswith('.T'):
+            return 'Japan'
+        elif ticker.endswith('.KS'):
+            return 'South Korea'
+        elif ticker.endswith('.SS') or ticker.endswith('.SZ'):
+            return 'China'
+        elif ticker.endswith('.HK'):
+            return 'Hong Kong'
+        elif '.' not in ticker:
+            return 'United States'
+        else:
+            return 'Unknown'
     
     def get_stock_history(self, ticker, period="1y"):
         """
@@ -498,8 +479,8 @@ class DataProvider:
             pandas.DataFrame: DataFrame with historical data
         """
         cache_key = f"history_{ticker}_{period}"
-        if self.cache.is_cached(cache_key):
-            return self.cache.get_from_cache(cache_key)
+        if self.data_cache.is_cached(cache_key):
+            return self.data_cache.get_from_cache(cache_key)
         
         try:
             stock = yf.Ticker(ticker)
@@ -510,7 +491,7 @@ class DataProvider:
                 return pd.DataFrame()
                 
             # Cache the results
-            self.cache.add_to_cache(cache_key, history)
+            self.data_cache.add_to_cache(cache_key, history)
             return history
             
         except Exception as e:
@@ -528,8 +509,8 @@ class DataProvider:
             dict: Dictionary with financial statements
         """
         cache_key = f"financials_{ticker}"
-        if self.cache.is_cached(cache_key):
-            return self.cache.get_from_cache(cache_key)
+        if self.data_cache.is_cached(cache_key):
+            return self.data_cache.get_from_cache(cache_key)
         
         try:
             stock = yf.Ticker(ticker)
@@ -541,7 +522,7 @@ class DataProvider:
             }
             
             # Cache the results
-            self.cache.add_to_cache(cache_key, financials)
+            self.data_cache.add_to_cache(cache_key, financials)
             return financials
             
         except Exception as e:
