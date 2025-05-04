@@ -1,7 +1,5 @@
 # WorldScreener
 
-![WorldScreener Logo](https://via.placeholder.com/800x200?text=WorldScreener:+Value+Stock+Screening+Tool)
-
 **A comprehensive stock screening tool for value investors focused on European and US markets.**
 
 ## Overview
